@@ -8,7 +8,7 @@ on:
 
 jobs:
   unitary_tests:
-    name: Run clippy and unitary tests
+    name: Run unitary tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -32,8 +32,10 @@ jobs:
           args: --verbose
 
   coverage:
+    name: Update coverage report
     runs-on: ubuntu-latest
-    name: ubuntu / stable / coverage
+    if: github.ref == 'refs/heads/main'
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,7 +58,7 @@ jobs:
           command: generate-lockfile
 
       - name: Cargo llvm-cov
-        run: cargo llvm-cov --locked --lcov --output-path lcov.info -- --nocapture
+        run: cargo llvm-cov --locked --lcov --output-path lcov.info --no-default-features --package globe-rs -- --nocapture
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
