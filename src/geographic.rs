@@ -14,7 +14,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 ///
 /// ## Example
 /// ```
-/// use globe_rs::{Float, PI, geographic::Longitude};
+/// use globe_rs::{PI, geographic::Longitude};
 ///
 /// assert_eq!(
 ///     Longitude::from(PI + 1.),
@@ -76,7 +76,7 @@ impl From<cartesian::Coordinates> for Longitude {
 ///
 /// ## Example
 /// ```
-/// use globe_rs::{Float, PI, geographic::Latitude};
+/// use globe_rs::{PI, geographic::Latitude};
 ///
 /// let overflowing_latitude = Latitude::from(-5. * PI / 4.);
 /// let equivalent_latitude = Latitude::from(PI / 4.);
@@ -85,7 +85,7 @@ impl From<cartesian::Coordinates> for Longitude {
 /// let abs_error = 0.0000000000000002;
 ///
 /// assert!(
-///     (Float::from(equivalent_latitude) - Float::from(overflowing_latitude)).abs() <= abs_error,
+///     (f64::from(equivalent_latitude) - f64::from(overflowing_latitude)).abs() <= abs_error,
 ///     "the overflowing latitude should be as the equivalent latitude ± e"
 /// );
 /// ```

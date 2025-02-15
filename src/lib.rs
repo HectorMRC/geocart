@@ -2,12 +2,12 @@ pub mod cartesian;
 pub mod geographic;
 
 #[cfg(not(feature = "f64"))]
-pub type Float = f32;
+pub(self) type Float = f32;
 #[cfg(not(feature = "f64"))]
 pub use std::f32::consts::{FRAC_PI_2, PI};
 
 #[cfg(feature = "f64")]
-pub type Float = f64;
+pub(self) type Float = f64;
 #[cfg(feature = "f64")]
 pub use std::f64::consts::{FRAC_PI_2, PI};
 
