@@ -1,6 +1,6 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, AddAssign, Sub, SubAssign};
 
-use crate::{cartesian, Float, FRAC_PI_2, PI};
+use crate::{cartesian, Float, FRAC_PI_2, PI, TAU};
 
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -38,7 +38,7 @@ impl From<Float> for Longitude {
                     // Both boundaries of the range are consecutive, which means that
                     // overflowing one is the same as continuing from the other one
                     // in the same direction.
-                    (value + PI).rem_euclid(2. * PI) - PI
+                    (value + PI).rem_euclid(TAU) - PI
                 }),
         )
     }
@@ -70,16 +70,38 @@ impl From<cartesian::Coordinates> for Longitude {
 impl Add<Float> for Longitude {
     type Output = Self;
 
-    fn add(self, rhs: Float) -> Self::Output {
-        Longitude::from(self.0 + rhs)
+    fn add(mut self, rhs: Float) -> Self::Output {
+        self += rhs;
+        self
+    }
+}
+
+impl AddAssign<Float> for Longitude {
+    fn add_assign(&mut self, rhs: Float) {
+        *self = Longitude::from(self.0 + rhs)
     }
 }
 
 impl Sub<Float> for Longitude {
     type Output = Self;
 
-    fn sub(self, rhs: Float) -> Self::Output {
-        Longitude::from(self.0 - rhs)
+    fn sub(mut self, rhs: Float) -> Self::Output {
+        self -= rhs;
+        self
+    }
+}
+
+impl SubAssign<Float> for Longitude {
+    fn sub_assign(&mut self, rhs: Float) {
+        *self = Longitude::from(self.0 - rhs)
+    }
+}
+
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
+impl Longitude {
+    /// Returns the inner value of the longitude.
+    pub fn inner(&self) -> Float {
+        self.0
     }
 }
 
@@ -146,16 +168,38 @@ impl From<cartesian::Coordinates> for Latitude {
 impl Add<Float> for Latitude {
     type Output = Self;
 
-    fn add(self, rhs: Float) -> Self::Output {
-        Latitude::from(self.0 + rhs)
+    fn add(mut self, rhs: Float) -> Self::Output {
+        self += rhs;
+        self
+    }
+}
+
+impl AddAssign<Float> for Latitude {
+    fn add_assign(&mut self, rhs: Float) {
+        *self = Latitude::from(self.0 + rhs)
     }
 }
 
 impl Sub<Float> for Latitude {
     type Output = Self;
 
-    fn sub(self, rhs: Float) -> Self::Output {
-        Latitude::from(self.0 - rhs)
+    fn sub(mut self, rhs: Float) -> Self::Output {
+        self -= rhs;
+        self
+    }
+}
+
+impl SubAssign<Float> for Latitude {
+    fn sub_assign(&mut self, rhs: Float) {
+        *self = Latitude::from(self.0 - rhs)
+    }
+}
+
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
+impl Latitude {
+    /// Returns the inner value of the latitude.
+    pub fn inner(&self) -> Float {
+        self.0
     }
 }
 
@@ -201,16 +245,38 @@ impl From<cartesian::Coordinates> for Altitude {
 impl Add<Float> for Altitude {
     type Output = Self;
 
-    fn add(self, rhs: Float) -> Self::Output {
-        Altitude::from(self.0 + rhs)
+    fn add(mut self, rhs: Float) -> Self::Output {
+        self += rhs;
+        self
+    }
+}
+
+impl AddAssign<Float> for Altitude {
+    fn add_assign(&mut self, rhs: Float) {
+        *self = Altitude::from(self.0 + rhs)
     }
 }
 
 impl Sub<Float> for Altitude {
     type Output = Self;
 
-    fn sub(self, rhs: Float) -> Self::Output {
-        Altitude::from(self.0 - rhs)
+    fn sub(mut self, rhs: Float) -> Self::Output {
+        self -= rhs;
+        self
+    }
+}
+
+impl SubAssign<Float> for Altitude {
+    fn sub_assign(&mut self, rhs: Float) {
+        *self = Altitude::from(self.0 - rhs)
+    }
+}
+
+#[cfg_attr(feature = "wasm", wasm_bindgen)]
+impl Altitude {
+    /// Returns the inner value of the altitude.
+    pub fn inner(&self) -> Float {
+        self.0
     }
 }
 
@@ -230,6 +296,50 @@ impl From<cartesian::Coordinates> for Coordinates {
             .with_longitude(point.into())
             .with_latitude(point.into())
             .with_altitude(point.into())
+    }
+}
+
+impl Add<Latitude> for Coordinates {
+    type Output = Self;
+
+    /// Adds the given [`Latitude`] to the [`Coordinates`].
+    /// 
+    /// See [`Coordinates::add_assign`] for more information.
+    fn add(mut self, rhs: Latitude) -> Self::Output {
+        self += rhs;
+        self
+    }
+}
+
+impl AddAssign<Latitude> for Coordinates {
+    /// Adds the given [`Latitude`] to self.
+    ///
+    /// ## Overflow
+    /// Since latitude corresponds to meridians, overflowing its range may imply moving from one meridian to its complementary.
+    ///
+    /// ```rust
+    /// use std::ops::Add;
+    /// use std::f64::consts::{FRAC_PI_2, FRAC_PI_4, PI};
+    /// 
+    /// use globe_rs::geographic::{Coordinates, Latitude, Longitude};
+    ///
+    /// let point = Coordinates::default()
+    ///     .with_longitude(FRAC_PI_2.into())
+    ///     .with_latitude(FRAC_PI_4.into())
+    ///     .add(FRAC_PI_2.into());
+    /// 
+    /// assert_eq!(
+    ///     point.longitude,
+    ///     Longitude::from(-FRAC_PI_2),
+    /// )
+    /// ```
+    fn add_assign(&mut self, rhs: Latitude) {
+        // The slope of sin(x) is determined by cos(x).
+        if self.latitude.inner().cos().signum() != (self.latitude.inner() + rhs.inner()).cos().signum() {
+            self.longitude += PI;
+        }
+        
+        self.latitude += rhs.inner();
     }
 }
 
