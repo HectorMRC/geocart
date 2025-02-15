@@ -16,6 +16,7 @@ globe-rs = { path = ".", features = ["f64"] }
 num-traits = "0.2.19"
 
 [features]
+default = ["f64"]
 f64 = []
 serde = ["dep:serde"]
 wasm = ["dep:wasm-bindgen"]

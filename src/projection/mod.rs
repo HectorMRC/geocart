@@ -11,7 +11,7 @@ use crate::{cartesian, geographic};
 /// A projection is a function that maps geographic coordinates to cartesian coordinates and vice versa.
 pub trait Projection {
     /// Projects the given geographic coordinates to cartesian coordinates.
-    fn forward(coordinates: &geographic::Coordinates) -> cartesian::Coordinates;
+    fn forward(&self, coordinates: &geographic::Coordinates) -> cartesian::Coordinates;
     /// Unprojects the given cartesian coordinates to geographic coordinates.
-    fn reverse(coordinates: &cartesian::Coordinates) -> geographic::Coordinates;
+    fn reverse(&self, coordinates: &cartesian::Coordinates) -> geographic::Coordinates;
 }

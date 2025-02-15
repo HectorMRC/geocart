@@ -1,6 +1,6 @@
 //! Equirectangular projection.
 
-use crate::{cartesian, geographic};
+use crate::{cartesian, geographic, Float};
 
 use super::Projection;
 
@@ -8,21 +8,23 @@ use super::Projection;
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
-pub struct Equirectangular;
+pub struct Equirectangular {
+    radius: Float,
+}
 
 impl Projection for Equirectangular {
-    fn forward(coordinates: &geographic::Coordinates) -> cartesian::Coordinates {
+    fn forward(&self, coordinates: &geographic::Coordinates) -> cartesian::Coordinates {
         cartesian::Coordinates {
-            x: coordinates.longitude.inner(),
-            y: coordinates.latitude.inner(),
+            x: self.radius * coordinates.longitude.inner(),
+            y: self.radius * coordinates.latitude.inner(),
             ..Default::default()
         }
     }
 
-    fn reverse(coordinates: &cartesian::Coordinates) -> geographic::Coordinates {
+    fn reverse(&self, coordinates: &cartesian::Coordinates) -> geographic::Coordinates {
         geographic::Coordinates {
-            latitude: coordinates.y.into(),
-            longitude: coordinates.x.into(),
+            latitude: (coordinates.y / self.radius).into(),
+            longitude: (coordinates.x / self.radius).into(),
             ..Default::default()
         }
     }
