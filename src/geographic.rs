@@ -299,50 +299,6 @@ impl From<cartesian::Coordinates> for Coordinates {
     }
 }
 
-impl Add<Latitude> for Coordinates {
-    type Output = Self;
-
-    /// Adds the given [`Latitude`] to the [`Coordinates`].
-    /// 
-    /// See [`Coordinates::add_assign`] for more information.
-    fn add(mut self, rhs: Latitude) -> Self::Output {
-        self += rhs;
-        self
-    }
-}
-
-impl AddAssign<Latitude> for Coordinates {
-    /// Adds the given [`Latitude`] to self.
-    ///
-    /// ## Overflow
-    /// Since latitude corresponds to meridians, overflowing its range may imply moving from one meridian to its complementary.
-    ///
-    /// ```rust
-    /// use std::ops::Add;
-    /// use std::f64::consts::{FRAC_PI_2, FRAC_PI_4, PI};
-    /// 
-    /// use globe_rs::geographic::{Coordinates, Latitude, Longitude};
-    ///
-    /// let point = Coordinates::default()
-    ///     .with_longitude(FRAC_PI_2.into())
-    ///     .with_latitude(FRAC_PI_4.into())
-    ///     .add(FRAC_PI_2.into());
-    /// 
-    /// assert_eq!(
-    ///     point.longitude,
-    ///     Longitude::from(-FRAC_PI_2),
-    /// )
-    /// ```
-    fn add_assign(&mut self, rhs: Latitude) {
-        // The slope of sin(x) is determined by cos(x).
-        if self.latitude.inner().cos().signum() != (self.latitude.inner() + rhs.inner()).cos().signum() {
-            self.longitude += PI;
-        }
-        
-        self.latitude += rhs.inner();
-    }
-}
-
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Coordinates {
     pub fn with_longitude(mut self, longitude: Longitude) -> Self {
