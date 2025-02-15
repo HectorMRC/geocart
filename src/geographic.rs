@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub};
+
 use crate::{cartesian, Float, FRAC_PI_2, PI};
 
 #[cfg(feature = "wasm")]
@@ -65,6 +67,22 @@ impl From<cartesian::Coordinates> for Longitude {
     }
 }
 
+impl Add<Float> for Longitude {
+    type Output = Self;
+
+    fn add(self, rhs: Float) -> Self::Output {
+        Longitude::from(self.0 + rhs)
+    }
+}
+
+impl Sub<Float> for Longitude {
+    type Output = Self;
+
+    fn sub(self, rhs: Float) -> Self::Output {
+        Longitude::from(self.0 - rhs)
+    }
+}
+
 /// Represents the vertical axis in a geographic system of coordinates.
 ///
 /// ## Definition
@@ -125,6 +143,22 @@ impl From<cartesian::Coordinates> for Latitude {
     }
 }
 
+impl Add<Float> for Latitude {
+    type Output = Self;
+
+    fn add(self, rhs: Float) -> Self::Output {
+        Latitude::from(self.0 + rhs)
+    }
+}
+
+impl Sub<Float> for Latitude {
+    type Output = Self;
+
+    fn sub(self, rhs: Float) -> Self::Output {
+        Latitude::from(self.0 - rhs)
+    }
+}
+
 /// Represents the radius in a geographic system of coordinates.
 ///
 /// ## Definition
@@ -161,6 +195,22 @@ impl From<cartesian::Coordinates> for Altitude {
     /// Computes the [Altitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
     fn from(point: cartesian::Coordinates) -> Self {
         Float::sqrt(point.x.powi(2) + point.y.powi(2) + point.z.powi(2)).into()
+    }
+}
+
+impl Add<Float> for Altitude {
+    type Output = Self;
+
+    fn add(self, rhs: Float) -> Self::Output {
+        Altitude::from(self.0 + rhs)
+    }
+}
+
+impl Sub<Float> for Altitude {
+    type Output = Self;
+
+    fn sub(self, rhs: Float) -> Self::Output {
+        Altitude::from(self.0 - rhs)
     }
 }
 
