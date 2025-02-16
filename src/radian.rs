@@ -2,15 +2,11 @@
 
 use std::ops::MulAssign;
 
-#[cfg(feature = "wasm")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 use crate::{Float, PositiveFloat, TAU};
 
 /// The [radian](https://en.wikipedia.org/wiki/Radian) unit, which is always a positive number within the range of [0, 2π].
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct Radian(PositiveFloat);
 
 impl From<Float> for Radian {
@@ -34,19 +30,16 @@ impl MulAssign<Float> for Radian {
     }
 }
 
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
-impl Radian {
-    /// Returns the value as a [`Float`].
-    pub fn as_float(&self) -> Float {
-        self.0.as_float()
-    }
-}
-
 impl Radian {
     /// Smallest radian value.
     pub const MIN: Self = Self(PositiveFloat::MIN);
     /// Largest radian value.
     pub const MAX: Self = Self(PositiveFloat(TAU - Float::MIN_POSITIVE));
+
+    /// Returns the value as a [`Float`].
+    pub fn as_float(&self) -> Float {
+        self.0.as_float()
+    }
 }
 
 #[cfg(test)]

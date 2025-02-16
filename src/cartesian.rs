@@ -2,15 +2,11 @@
 
 use std::ops::Div;
 
-#[cfg(feature = "wasm")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 use crate::{geographic, transform::Transform, Float, FRAC_PI_2, PI};
 
 /// Coordinates according to the cartesian system of coordinates.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct Coordinates {
     pub x: Float,
     pub y: Float,
@@ -73,14 +69,6 @@ impl Div<Float> for Coordinates {
 }
 
 impl Coordinates {
-    /// Performs the given transformation over self.
-    pub fn transform<T: Transform<Self>>(self, transformation: T) -> Self {
-        transformation.transform(self)
-    }
-}
-
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
-impl Coordinates {
     pub fn with_x(mut self, x: Float) -> Self {
         self.x = x;
         self
@@ -99,6 +87,11 @@ impl Coordinates {
     /// Returns the distance between self and the given point.
     pub fn distance(&self, rhs: &Self) -> Float {
         ((self.x - rhs.x).powi(2) + (self.y - rhs.y).powi(2) + (self.z - rhs.z).powi(2)).sqrt()
+    }
+
+    /// Performs the given transformation over self.
+    pub fn transform<T: Transform<Self>>(self, transformation: T) -> Self {
+        transformation.transform(self)
     }
 }
 

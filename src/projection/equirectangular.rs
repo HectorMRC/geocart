@@ -1,8 +1,5 @@
 //! Equirectangular projection.
 
-#[cfg(feature = "wasm")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 use crate::{cartesian, geographic, PositiveFloat};
 
 use super::Projection;
@@ -10,7 +7,6 @@ use super::Projection;
 /// The [equirectangular projection](https://en.wikipedia.org/wiki/Equirectangular_projection).
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct Equirectangular {
     radius: PositiveFloat,
 }

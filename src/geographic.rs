@@ -1,8 +1,5 @@
 //! Geographic system of coordinates.
 
-#[cfg(feature = "wasm")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 use crate::{cartesian, Float, PositiveFloat, FRAC_PI_2, PI, TAU};
 
 /// Represents the horizontal axis in a geographic system of coordinates.
@@ -27,7 +24,6 @@ use crate::{cartesian, Float, PositiveFloat, FRAC_PI_2, PI, TAU};
 /// ```
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct Longitude(Float);
 
 impl From<Float> for Longitude {
@@ -63,7 +59,6 @@ impl From<cartesian::Coordinates> for Longitude {
     }
 }
 
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Longitude {
     /// Returns the value as a [`Float`].
     pub fn as_float(&self) -> Float {
@@ -99,7 +94,6 @@ impl Longitude {
 /// ```
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct Latitude(Float);
 
 impl From<Float> for Latitude {
@@ -127,7 +121,6 @@ impl From<cartesian::Coordinates> for Latitude {
     }
 }
 
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Latitude {
     /// Returns the value as a [`Float`].
     pub fn as_float(&self) -> Float {
@@ -152,7 +145,6 @@ impl Latitude {
 /// ```
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct Altitude(PositiveFloat);
 
 impl From<Float> for Altitude {
@@ -170,7 +162,6 @@ impl From<cartesian::Coordinates> for Altitude {
     }
 }
 
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Altitude {
     /// Returns the value as a [`Float`].
     pub fn as_float(&self) -> Float {
@@ -181,7 +172,6 @@ impl Altitude {
 /// Coordinates accodring to the geographical system of coordinates.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct Coordinates {
     pub longitude: Longitude,
     pub latitude: Latitude,
@@ -197,7 +187,6 @@ impl From<cartesian::Coordinates> for Coordinates {
     }
 }
 
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Coordinates {
     pub fn with_longitude(mut self, longitude: Longitude) -> Self {
         self.longitude = longitude;

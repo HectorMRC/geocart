@@ -15,13 +15,9 @@ pub(crate) type Float = f64;
 #[cfg(feature = "f64")]
 pub(crate) use std::f64::consts::{FRAC_PI_2, PI, TAU};
 
-#[cfg(feature = "wasm")]
-use wasm_bindgen::prelude::wasm_bindgen;
-
 /// A [`Float`] that is always positive.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct PositiveFloat(Float);
 
 impl From<Float> for PositiveFloat {
@@ -50,19 +46,16 @@ impl PartialOrd for PositiveFloat {
     }
 }
 
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
-impl PositiveFloat {
-    /// Returns the value as a [`Float`].
-    pub fn as_float(self) -> Float {
-        self.0
-    }
-}
-
 impl PositiveFloat {
     /// Smallest positive [`Float`] value.
     pub const MIN: Self = Self(0.);
     /// Largest finite [`Float`] value.
     pub const MAX: Self = Self(Float::MAX);
+
+    /// Returns the value as a [`Float`].
+    pub fn as_float(self) -> Float {
+        self.0
+    }
 }
 
 #[cfg(test)]

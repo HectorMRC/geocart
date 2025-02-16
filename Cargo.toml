@@ -9,17 +9,15 @@ repository = "https://github.com/HectorMRC/globe-rs"
 
 [dependencies]
 serde = { version = "1.0.217", features = ["derive"], optional = true }
-wasm-bindgen = { version = "0.2.87", optional = true }
 
 [dev-dependencies]
-globe-rs = { path = ".", features = ["f64", "serde", "wasm"] }
+globe-rs = { path = ".", features = ["f64", "serde"] }
 num-traits = "0.2.19"
 
 [features]
 default = ["f64"]
 f64 = []
 serde = ["dep:serde"]
-wasm = ["dep:wasm-bindgen"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]

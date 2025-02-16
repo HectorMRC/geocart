@@ -1,14 +1,10 @@
-//! Arc shape.
-
-#[cfg(feature = "wasm")]
-use wasm_bindgen::prelude::wasm_bindgen;
+//! Arc shape iterator.
 
 use crate::{cartesian, geographic, transform::Rotation, Float};
 
 /// Represents the arc shape between two points in a globe.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct Arc {
     pub from: geographic::Coordinates,
     pub to: geographic::Coordinates,
@@ -45,7 +41,6 @@ impl IntoIterator for Arc {
     }
 }
 
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Arc {
     pub fn new(segments: usize) -> Self {
         Self {
@@ -68,7 +63,6 @@ impl Arc {
 
 /// Iterator over the [`Arc`] shape.
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct ArcIter {
     from: cartesian::Coordinates,
     to: cartesian::Coordinates,
