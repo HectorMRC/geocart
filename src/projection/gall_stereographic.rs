@@ -1,3 +1,6 @@
+#[cfg(feature = "wasm")]
+use wasm_bindgen::prelude::wasm_bindgen;
+
 use crate::{cartesian, geographic, Float};
 
 use super::Projection;
@@ -13,14 +16,17 @@ impl Projection for GallStereographic {
     fn forward(&self, coordinates: &geographic::Coordinates) -> cartesian::Coordinates {
         cartesian::Coordinates {
             x: self.radius * coordinates.longitude.inner() / Float::sqrt(2.),
-            y: self.radius * (1. + Float::sqrt(2.) / 2.) * (coordinates.latitude.inner() / 2.).tan(),
+            y: self.radius
+                * (1. + Float::sqrt(2.) / 2.)
+                * (coordinates.latitude.inner() / 2.).tan(),
             ..Default::default()
         }
     }
 
     fn reverse(&self, coordinates: &cartesian::Coordinates) -> geographic::Coordinates {
         geographic::Coordinates {
-            latitude: (2. * (coordinates.y / (self.radius * (1. + Float::sqrt(2.) / 2.))).atan()).into(),
+            latitude: (2. * (coordinates.y / (self.radius * (1. + Float::sqrt(2.) / 2.))).atan())
+                .into(),
             longitude: (coordinates.x * Float::sqrt(2.) / self.radius).into(),
             ..Default::default()
         }

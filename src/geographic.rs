@@ -1,9 +1,9 @@
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
-use crate::{cartesian, Float, FRAC_PI_2, PI, TAU};
-
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
+
+use crate::{cartesian, Float, FRAC_PI_2, PI, TAU};
 
 /// Represents the horizontal axis in a geographic system of coordinates.
 ///
@@ -16,7 +16,9 @@ use wasm_bindgen::prelude::wasm_bindgen;
 ///
 /// ## Example
 /// ```
-/// use globe_rs::{PI, geographic::Longitude};
+/// use std::f64::consts::PI;
+///
+/// use globe_rs::{geographic::Longitude};
 ///
 /// assert_eq!(
 ///     Longitude::from(PI + 1.),
@@ -116,7 +118,9 @@ impl Longitude {
 ///
 /// ## Example
 /// ```
-/// use globe_rs::{PI, geographic::Latitude};
+/// use std::f64::consts::PI;
+///
+/// use globe_rs::geographic::Latitude;
 ///
 /// let overflowing_latitude = Latitude::from(-5. * PI / 4.);
 /// let equivalent_latitude = Latitude::from(PI / 4.);
@@ -237,8 +241,8 @@ impl From<Altitude> for Float {
 
 impl From<cartesian::Coordinates> for Altitude {
     /// Computes the [Altitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
-    fn from(point: cartesian::Coordinates) -> Self {
-        Float::sqrt(point.x.powi(2) + point.y.powi(2) + point.z.powi(2)).into()
+    fn from(coords: cartesian::Coordinates) -> Self {
+        Float::sqrt(coords.x.powi(2) + coords.y.powi(2) + coords.z.powi(2)).into()
     }
 }
 
@@ -291,11 +295,11 @@ pub struct Coordinates {
 }
 
 impl From<cartesian::Coordinates> for Coordinates {
-    fn from(point: cartesian::Coordinates) -> Self {
+    fn from(coords: cartesian::Coordinates) -> Self {
         Self::default()
-            .with_longitude(point.into())
-            .with_latitude(point.into())
-            .with_altitude(point.into())
+            .with_longitude(coords.into())
+            .with_latitude(coords.into())
+            .with_altitude(coords.into())
     }
 }
 
@@ -317,12 +321,10 @@ impl Coordinates {
     }
 
     /// Computes the [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance) from self to the given point (in radiants).
-    pub fn distance(&self, other: &Self) -> Float {
-        let prod_latitude_sin =
-            Float::from(self.latitude).sin() * Float::from(other.latitude).sin();
-        let prod_latitude_cos =
-            Float::from(self.latitude).cos() * Float::from(other.latitude).cos();
-        let longitude_diff = (Float::from(self.longitude) - Float::from(other.longitude)).abs();
+    pub fn distance(&self, rhs: &Self) -> Float {
+        let prod_latitude_sin = Float::from(self.latitude).sin() * Float::from(rhs.latitude).sin();
+        let prod_latitude_cos = Float::from(self.latitude).cos() * Float::from(rhs.latitude).cos();
+        let longitude_diff = (Float::from(self.longitude) - Float::from(rhs.longitude)).abs();
 
         (prod_latitude_sin + prod_latitude_cos * longitude_diff.cos()).acos()
     }

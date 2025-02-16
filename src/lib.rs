@@ -1,16 +1,18 @@
 pub mod cartesian;
 pub mod geographic;
 pub mod projection;
+pub mod radian;
+pub mod transform;
 
 #[cfg(not(feature = "f64"))]
-pub(self) type Float = f32;
+pub(crate) type Float = f32;
 #[cfg(not(feature = "f64"))]
-pub(self) use std::f32::consts::{FRAC_PI_2, PI, TAU};
+pub(crate) use std::f32::consts::{FRAC_PI_2, PI, TAU};
 
 #[cfg(feature = "f64")]
-pub(self) type Float = f64;
+pub(crate) type Float = f64;
 #[cfg(feature = "f64")]
-pub(self) use std::f64::consts::{FRAC_PI_2, PI, TAU};
+pub(crate) use std::f64::consts::{FRAC_PI_2, PI, TAU};
 
 #[cfg(test)]
 mod tests {

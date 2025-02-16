@@ -1,9 +1,9 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-use crate::{geographic, Float, FRAC_PI_2, PI};
-
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
+
+use crate::{geographic, transform::Transform, Float, FRAC_PI_2, PI};
 
 /// Coordinates according to the cartesian system of coordinates.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
@@ -65,7 +65,7 @@ impl Mul<Float> for Coordinates {
     type Output = Self;
 
     fn mul(mut self, rhs: Float) -> Self::Output {
-        self /= rhs;
+        self *= rhs;
         self
     }
 }
@@ -96,14 +96,14 @@ impl DivAssign<Float> for Coordinates {
 }
 
 impl From<geographic::Coordinates> for Coordinates {
-    fn from(point: geographic::Coordinates) -> Self {
-        let radial_distance = match point.altitude.into() {
+    fn from(coords: geographic::Coordinates) -> Self {
+        let radial_distance = match coords.altitude.into() {
             altitude if altitude == 0. => 1.,
             altitude => altitude,
         };
 
-        let theta = FRAC_PI_2 - Float::from(point.latitude);
-        let phi = point.longitude.into();
+        let theta = FRAC_PI_2 - Float::from(coords.latitude);
+        let phi = coords.longitude.into();
 
         // improves sin & cos precision for exact numbers
         let precise_sin_cos = |rad: Float| -> (Float, Float) {
@@ -126,6 +126,23 @@ impl From<geographic::Coordinates> for Coordinates {
             y: radial_distance * theta_sin * phi_sin,
             z: radial_distance * theta_cos,
         }
+    }
+}
+
+impl IntoIterator for Coordinates {
+    type Item = Float;
+
+    type IntoIter = std::array::IntoIter<Float, 3>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        [self.x, self.y, self.z].into_iter()
+    }
+}
+
+impl Coordinates {
+    /// Performs the given transformation over self.
+    pub fn transform<T: Transform<Self>>(self, transformation: T) -> Self {
+        transformation.transform(self)
     }
 }
 

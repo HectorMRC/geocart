@@ -1,5 +1,8 @@
 //! Equirectangular projection.
 
+#[cfg(feature = "wasm")]
+use wasm_bindgen::prelude::wasm_bindgen;
+
 use crate::{cartesian, geographic, Float};
 
 use super::Projection;
