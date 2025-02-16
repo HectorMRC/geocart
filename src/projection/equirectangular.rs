@@ -3,7 +3,7 @@
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::{cartesian, geographic, Float};
+use crate::{cartesian, geographic, PositiveFloat};
 
 use super::Projection;
 
@@ -12,22 +12,22 @@ use super::Projection;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct Equirectangular {
-    radius: Float,
+    radius: PositiveFloat,
 }
 
 impl Projection for Equirectangular {
     fn forward(&self, coordinates: &geographic::Coordinates) -> cartesian::Coordinates {
         cartesian::Coordinates {
-            x: self.radius * coordinates.longitude.inner(),
-            y: self.radius * coordinates.latitude.inner(),
+            x: self.radius.as_float() * coordinates.longitude.as_float(),
+            y: self.radius.as_float() * coordinates.latitude.as_float(),
             ..Default::default()
         }
     }
 
     fn reverse(&self, coordinates: &cartesian::Coordinates) -> geographic::Coordinates {
         geographic::Coordinates {
-            latitude: (coordinates.y / self.radius).into(),
-            longitude: (coordinates.x / self.radius).into(),
+            latitude: (coordinates.y / self.radius.as_float()).into(),
+            longitude: (coordinates.x / self.radius.as_float()).into(),
             ..Default::default()
         }
     }

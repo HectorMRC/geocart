@@ -1,7 +1,5 @@
 //! Rotation transformation.
 
-use std::ops::Neg;
-
 use crate::{cartesian::Coordinates, radian::Radian};
 
 use super::Transform;
@@ -49,8 +47,12 @@ pub struct Rotation {
 
 impl Transform<Coordinates> for Rotation {
     fn transform(&self, coords: Coordinates) -> Coordinates {
-        let sin_theta = self.theta.inner().sin();
-        let cos_theta = self.theta.inner().cos();
+        if self.theta == Radian::MIN {
+            return coords;
+        }
+
+        let sin_theta = self.theta.as_float().sin();
+        let cos_theta = self.theta.as_float().cos();
         let sub_1_cos_theta = 1. - cos_theta;
 
         let x = self.axis.x;
@@ -71,28 +73,11 @@ impl Transform<Coordinates> for Rotation {
     }
 }
 
-impl Neg for Rotation {
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        Self {
-            theta: -self.theta,
-            axis: self.axis,
-        }
-    }
-}
-
 impl Rotation {
     /// Sets as the rotation axis the normal vector pointing from the origin to the given [`Coordinates`].
-    pub fn with_axis(mut self, mut coords: Coordinates) -> Self {
+    pub fn with_axis(mut self, coords: Coordinates) -> Self {
         let magnitude = coords.distance(&Coordinates::default());
-        if magnitude != 1. {
-            coords.x /= magnitude;
-            coords.y /= magnitude;
-            coords.z /= magnitude;
-        }
-
-        self.axis = coords;
+        self.axis = coords / magnitude;
         self
     }
 

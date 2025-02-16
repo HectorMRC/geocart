@@ -1,5 +1,7 @@
 //! Cartesian system of coordinates.
 
+use std::ops::Div;
+
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -17,13 +19,13 @@ pub struct Coordinates {
 
 impl From<geographic::Coordinates> for Coordinates {
     fn from(coords: geographic::Coordinates) -> Self {
-        let radial_distance = match coords.altitude.into() {
+        let radial_distance = match coords.altitude.as_float() {
             altitude if altitude == 0. => 1.,
             altitude => altitude,
         };
 
-        let theta = FRAC_PI_2 - Float::from(coords.latitude);
-        let phi = coords.longitude.into();
+        let theta = FRAC_PI_2 - coords.latitude.as_float();
+        let phi = coords.longitude.as_float();
 
         // improves sin & cos precision for exact numbers
         let precise_sin_cos = |rad: Float| -> (Float, Float) {
@@ -56,6 +58,17 @@ impl IntoIterator for Coordinates {
 
     fn into_iter(self) -> Self::IntoIter {
         [self.x, self.y, self.z].into_iter()
+    }
+}
+
+impl Div<Float> for Coordinates {
+    type Output = Self;
+
+    fn div(mut self, rhs: Float) -> Self::Output {
+        self.x /= rhs;
+        self.y /= rhs;
+        self.z /= rhs;
+        self
     }
 }
 

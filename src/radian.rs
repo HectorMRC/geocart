@@ -1,22 +1,22 @@
 //! Radian unit.
 
-use std::ops::Neg;
+use std::ops::MulAssign;
 
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::{Float, TAU};
+use crate::{Float, PositiveFloat, TAU};
 
 /// The [radian](https://en.wikipedia.org/wiki/Radian) unit, which is always a positive number within the range of [0, 2π].
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
-pub struct Radian(Float);
+pub struct Radian(PositiveFloat);
 
 impl From<Float> for Radian {
     fn from(value: Float) -> Self {
         if (0. ..TAU).contains(&value) {
-            return Self(value);
+            return Self(value.into());
         }
 
         let mut modulus = value % TAU;
@@ -24,35 +24,29 @@ impl From<Float> for Radian {
             modulus = (modulus + TAU) % TAU;
         }
 
-        Self(modulus)
+        Self(modulus.into())
     }
 }
 
-impl From<Radian> for Float {
-    fn from(value: Radian) -> Self {
-        value.0
-    }
-}
-
-impl Neg for Radian {
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        (-self.0).into()
+impl MulAssign<Float> for Radian {
+    fn mul_assign(&mut self, rhs: Float) {
+        *self = (self.as_float() * rhs).into();
     }
 }
 
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Radian {
-    /// Returns the inner value.
-    pub fn inner(&self) -> Float {
-        self.0
+    /// Returns the value as a [`Float`].
+    pub fn as_float(&self) -> Float {
+        self.0.as_float()
     }
+}
 
-    /// Returns the absolute difference between self and the given radiant.
-    pub fn abs_diff(self, rhs: Self) -> Self {
-        Self((self.0 - rhs.0).abs())
-    }
+impl Radian {
+    /// Smallest radian value.
+    pub const MIN: Self = Self(PositiveFloat::MIN);
+    /// Largest radian value.
+    pub const MAX: Self = Self(PositiveFloat(TAU - Float::MIN_POSITIVE));
 }
 
 #[cfg(test)]
@@ -93,7 +87,7 @@ mod tests {
         ]
         .into_iter()
         .for_each(|test| {
-            let radiant = Radian::from(test.input).inner();
+            let radiant = Radian::from(test.input).as_float();
 
             assert_eq!(
                 radiant, test.output,

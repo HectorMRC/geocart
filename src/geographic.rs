@@ -3,7 +3,7 @@
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::{cartesian, Float, FRAC_PI_2, PI, TAU};
+use crate::{cartesian, Float, PositiveFloat, FRAC_PI_2, PI, TAU};
 
 /// Represents the horizontal axis in a geographic system of coordinates.
 ///
@@ -46,12 +46,6 @@ impl From<Float> for Longitude {
     }
 }
 
-impl From<Longitude> for Float {
-    fn from(value: Longitude) -> Self {
-        value.0
-    }
-}
-
 impl From<cartesian::Coordinates> for Longitude {
     /// Computes the [Longitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
     fn from(point: cartesian::Coordinates) -> Self {
@@ -71,8 +65,8 @@ impl From<cartesian::Coordinates> for Longitude {
 
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Longitude {
-    /// Returns the inner value of the longitude.
-    pub fn inner(&self) -> Float {
+    /// Returns the value as a [`Float`].
+    pub fn as_float(&self) -> Float {
         self.0
     }
 }
@@ -99,7 +93,7 @@ impl Longitude {
 /// let abs_error = 0.0000000000000002;
 ///
 /// assert!(
-///     (f64::from(equivalent_latitude) - f64::from(overflowing_latitude)).abs() <= abs_error,
+///     (equivalent_latitude.as_float() - overflowing_latitude.as_float()).abs() <= abs_error,
 ///     "the overflowing latitude should be as the equivalent latitude ± e"
 /// );
 /// ```
@@ -115,12 +109,6 @@ impl From<Float> for Latitude {
         } else {
             value.sin().asin()
         })
-    }
-}
-
-impl From<Latitude> for Float {
-    fn from(value: Latitude) -> Self {
-        value.0
     }
 }
 
@@ -141,8 +129,8 @@ impl From<cartesian::Coordinates> for Latitude {
 
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Latitude {
-    /// Returns the inner value of the latitude.
-    pub fn inner(&self) -> Float {
+    /// Returns the value as a [`Float`].
+    pub fn as_float(&self) -> Float {
         self.0
     }
 }
@@ -165,32 +153,28 @@ impl Latitude {
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
-pub struct Altitude(Float);
+pub struct Altitude(PositiveFloat);
 
 impl From<Float> for Altitude {
     fn from(value: Float) -> Self {
-        Self(value.abs())
-    }
-}
-
-impl From<Altitude> for Float {
-    fn from(value: Altitude) -> Self {
-        value.0
+        Self(value.abs().into())
     }
 }
 
 impl From<cartesian::Coordinates> for Altitude {
     /// Computes the [Altitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
     fn from(coords: cartesian::Coordinates) -> Self {
-        Float::sqrt(coords.x.powi(2) + coords.y.powi(2) + coords.z.powi(2)).into()
+        (coords.x.powi(2) + coords.y.powi(2) + coords.z.powi(2))
+            .sqrt()
+            .into()
     }
 }
 
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Altitude {
-    /// Returns the inner value of the altitude.
-    pub fn inner(&self) -> Float {
-        self.0
+    /// Returns the value as a [`Float`].
+    pub fn as_float(&self) -> Float {
+        self.0.as_float()
     }
 }
 
@@ -232,9 +216,9 @@ impl Coordinates {
 
     /// Computes the [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance) from self to the given point (in radiants).
     pub fn distance(&self, rhs: &Self) -> Float {
-        let prod_latitude_sin = Float::from(self.latitude).sin() * Float::from(rhs.latitude).sin();
-        let prod_latitude_cos = Float::from(self.latitude).cos() * Float::from(rhs.latitude).cos();
-        let longitude_diff = (Float::from(self.longitude) - Float::from(rhs.longitude)).abs();
+        let prod_latitude_sin = self.latitude.as_float().sin() * rhs.latitude.as_float().sin();
+        let prod_latitude_cos = self.latitude.as_float().cos() * rhs.latitude.as_float().cos();
+        let longitude_diff = (self.longitude.as_float() - rhs.longitude.as_float()).abs();
 
         (prod_latitude_sin + prod_latitude_cos * longitude_diff.cos()).acos()
     }
@@ -281,7 +265,7 @@ mod tests {
         ]
         .into_iter()
         .for_each(|test| {
-            let longitude: Float = Longitude::from(test.input).into();
+            let longitude: Float = Longitude::from(test.input).as_float();
 
             assert_eq!(
                 longitude, test.output,
@@ -325,7 +309,7 @@ mod tests {
         ]
         .into_iter()
         .for_each(|test| {
-            let latitude: Float = Latitude::from(test.input).into();
+            let latitude: Float = Latitude::from(test.input).as_float();
 
             assert!(
                 approx_eq(latitude, test.output, ABS_ERROR),
@@ -396,8 +380,8 @@ mod tests {
                 test.output.longitude,
                 "{}: got longitude = {}, want {}",
                 test.name,
-                Float::from(point.longitude),
-                Float::from(test.output.longitude),
+                point.longitude.as_float(),
+                test.output.longitude.as_float(),
             );
 
             assert_eq!(
@@ -405,8 +389,8 @@ mod tests {
                 test.output.latitude,
                 "{}: got latitude = {}, want {}",
                 test.name,
-                Float::from(point.latitude),
-                Float::from(test.output.latitude),
+                point.latitude.as_float(),
+                test.output.latitude.as_float(),
             );
 
             assert_eq!(
@@ -414,8 +398,8 @@ mod tests {
                 test.output.altitude,
                 "{}: got altitude = {}, want {}",
                 test.name,
-                Float::from(point.altitude),
-                Float::from(test.output.altitude),
+                point.altitude.as_float(),
+                test.output.altitude.as_float(),
             );
         });
     }
