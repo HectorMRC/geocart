@@ -1,3 +1,5 @@
+//! Gall Stereographic projection.
+
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -5,7 +7,7 @@ use crate::{cartesian, geographic, Float};
 
 use super::Projection;
 
-/// Gall Stereographic projection.
+/// The [Gall Stereographic projection](https://en.wikipedia.org/wiki/Gall_stereographic_projection).
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 pub struct GallStereographic {

@@ -1,3 +1,5 @@
+//! Rotation transformation.
+
 use std::ops::Neg;
 
 use crate::{cartesian::Coordinates, radian::Radian};

@@ -1,3 +1,5 @@
+//! Transform definitions and implementations.
+
 mod rotation;
 pub use rotation::*;
 

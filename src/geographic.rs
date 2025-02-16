@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Sub, SubAssign};
+//! Geographic system of coordinates.
 
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -66,36 +66,6 @@ impl From<cartesian::Coordinates> for Longitude {
             _ => 0., // fallback value
         }
         .into()
-    }
-}
-
-impl Add<Float> for Longitude {
-    type Output = Self;
-
-    fn add(mut self, rhs: Float) -> Self::Output {
-        self += rhs;
-        self
-    }
-}
-
-impl AddAssign<Float> for Longitude {
-    fn add_assign(&mut self, rhs: Float) {
-        *self = Longitude::from(self.0 + rhs)
-    }
-}
-
-impl Sub<Float> for Longitude {
-    type Output = Self;
-
-    fn sub(mut self, rhs: Float) -> Self::Output {
-        self -= rhs;
-        self
-    }
-}
-
-impl SubAssign<Float> for Longitude {
-    fn sub_assign(&mut self, rhs: Float) {
-        *self = Longitude::from(self.0 - rhs)
     }
 }
 
@@ -169,36 +139,6 @@ impl From<cartesian::Coordinates> for Latitude {
     }
 }
 
-impl Add<Float> for Latitude {
-    type Output = Self;
-
-    fn add(mut self, rhs: Float) -> Self::Output {
-        self += rhs;
-        self
-    }
-}
-
-impl AddAssign<Float> for Latitude {
-    fn add_assign(&mut self, rhs: Float) {
-        *self = Latitude::from(self.0 + rhs)
-    }
-}
-
-impl Sub<Float> for Latitude {
-    type Output = Self;
-
-    fn sub(mut self, rhs: Float) -> Self::Output {
-        self -= rhs;
-        self
-    }
-}
-
-impl SubAssign<Float> for Latitude {
-    fn sub_assign(&mut self, rhs: Float) {
-        *self = Latitude::from(self.0 - rhs)
-    }
-}
-
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Latitude {
     /// Returns the inner value of the latitude.
@@ -243,36 +183,6 @@ impl From<cartesian::Coordinates> for Altitude {
     /// Computes the [Altitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
     fn from(coords: cartesian::Coordinates) -> Self {
         Float::sqrt(coords.x.powi(2) + coords.y.powi(2) + coords.z.powi(2)).into()
-    }
-}
-
-impl Add<Float> for Altitude {
-    type Output = Self;
-
-    fn add(mut self, rhs: Float) -> Self::Output {
-        self += rhs;
-        self
-    }
-}
-
-impl AddAssign<Float> for Altitude {
-    fn add_assign(&mut self, rhs: Float) {
-        *self = Altitude::from(self.0 + rhs)
-    }
-}
-
-impl Sub<Float> for Altitude {
-    type Output = Self;
-
-    fn sub(mut self, rhs: Float) -> Self::Output {
-        self -= rhs;
-        self
-    }
-}
-
-impl SubAssign<Float> for Altitude {
-    fn sub_assign(&mut self, rhs: Float) {
-        *self = Altitude::from(self.0 - rhs)
     }
 }
 

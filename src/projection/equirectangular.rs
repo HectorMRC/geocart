@@ -7,7 +7,7 @@ use crate::{cartesian, geographic, Float};
 
 use super::Projection;
 
-/// Equirectangular projection.
+/// The [equirectangular projection](https://en.wikipedia.org/wiki/Equirectangular_projection).
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "wasm", wasm_bindgen)]

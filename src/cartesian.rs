@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+//! Cartesian system of coordinates.
 
 #[cfg(feature = "wasm")]
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -13,86 +13,6 @@ pub struct Coordinates {
     pub x: Float,
     pub y: Float,
     pub z: Float,
-}
-
-impl Neg for Coordinates {
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        Self {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
-    }
-}
-
-impl Add for Coordinates {
-    type Output = Self;
-
-    fn add(mut self, rhs: Self) -> Self::Output {
-        self += rhs;
-        self
-    }
-}
-
-impl AddAssign for Coordinates {
-    fn add_assign(&mut self, rhs: Self) {
-        self.x += rhs.x;
-        self.y += rhs.y;
-        self.z += rhs.z;
-    }
-}
-
-impl Sub for Coordinates {
-    type Output = Self;
-
-    fn sub(mut self, rhs: Self) -> Self::Output {
-        self -= rhs;
-        self
-    }
-}
-
-impl SubAssign for Coordinates {
-    fn sub_assign(&mut self, rhs: Self) {
-        self.x -= rhs.x;
-        self.y -= rhs.y;
-        self.z -= rhs.z;
-    }
-}
-
-impl Mul<Float> for Coordinates {
-    type Output = Self;
-
-    fn mul(mut self, rhs: Float) -> Self::Output {
-        self *= rhs;
-        self
-    }
-}
-
-impl MulAssign<Float> for Coordinates {
-    fn mul_assign(&mut self, rhs: Float) {
-        self.x *= rhs;
-        self.y *= rhs;
-        self.z *= rhs;
-    }
-}
-
-impl Div<Float> for Coordinates {
-    type Output = Self;
-
-    fn div(mut self, rhs: Float) -> Self::Output {
-        self /= rhs;
-        self
-    }
-}
-
-impl DivAssign<Float> for Coordinates {
-    fn div_assign(&mut self, rhs: Float) {
-        self.x /= rhs;
-        self.y /= rhs;
-        self.z /= rhs;
-    }
 }
 
 impl From<geographic::Coordinates> for Coordinates {
