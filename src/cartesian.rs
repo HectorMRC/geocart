@@ -68,10 +68,6 @@ impl Coordinates {
 
 #[cfg_attr(feature = "wasm", wasm_bindgen)]
 impl Coordinates {
-    pub fn new(x: Float, y: Float, z: Float) -> Self {
-        Self { x, y, z }
-    }
-
     pub fn with_x(mut self, x: Float) -> Self {
         self.x = x;
         self
@@ -113,39 +109,39 @@ mod tests {
             Test {
                 name: "north point",
                 input: geographic::Coordinates::default().with_latitude(Latitude::from(FRAC_PI_2)),
-                output: Coordinates::new(0., 0., 1.),
+                output: Coordinates::default().with_z(1.),
             },
             Test {
                 name: "south point",
                 input: geographic::Coordinates::default().with_latitude(Latitude::from(-FRAC_PI_2)),
-                output: Coordinates::new(0., 0., -1.),
+                output: Coordinates::default().with_z(-1.),
             },
             Test {
                 name: "east point",
                 input: geographic::Coordinates::default()
                     .with_longitude(Longitude::from(FRAC_PI_2)),
-                output: Coordinates::new(0., 1., 0.),
+                output: Coordinates::default().with_y(1.),
             },
             Test {
                 name: "weast point",
                 input: geographic::Coordinates::default()
                     .with_longitude(Longitude::from(-FRAC_PI_2)),
-                output: Coordinates::new(0., -1., 0.),
+                output: Coordinates::default().with_y(-1.),
             },
             Test {
                 name: "front point",
                 input: geographic::Coordinates::default(),
-                output: Coordinates::new(1., 0., 0.),
+                output: Coordinates::default().with_x(1.),
             },
             Test {
                 name: "back point as negative bound",
                 input: geographic::Coordinates::default().with_longitude(Longitude::from(-PI)),
-                output: Coordinates::new(-1., 0., 0.),
+                output: Coordinates::default().with_x(-1.),
             },
             Test {
                 name: "back point as positive bound",
                 input: geographic::Coordinates::default().with_longitude(Longitude::from(PI)),
-                output: Coordinates::new(-1., 0., 0.),
+                output: Coordinates::default().with_x(-1.),
             },
         ]
         .into_iter()

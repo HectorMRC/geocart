@@ -348,40 +348,40 @@ mod tests {
         vec![
             Test {
                 name: "north point",
-                input: cartesian::Coordinates::new(0., 0., 1.),
+                input: cartesian::Coordinates::default().with_z(1.),
                 output: Coordinates::default()
                     .with_latitude(Latitude::from(FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "south point",
-                input: cartesian::Coordinates::new(0., 0., -1.),
+                input: cartesian::Coordinates::default().with_z(-1.),
                 output: Coordinates::default()
                     .with_latitude(Latitude::from(-FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "east point",
-                input: cartesian::Coordinates::new(0., 1., 0.),
+                input: cartesian::Coordinates::default().with_y(1.),
                 output: Coordinates::default()
                     .with_longitude(Longitude::from(FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "weast point",
-                input: cartesian::Coordinates::new(0., -1., 0.),
+                input: cartesian::Coordinates::default().with_y(-1.),
                 output: Coordinates::default()
                     .with_longitude(Longitude::from(-FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "front point",
-                input: cartesian::Coordinates::new(1., 0., 0.),
+                input: cartesian::Coordinates::default().with_x(1.),
                 output: Coordinates::default().with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "back point",
-                input: cartesian::Coordinates::new(-1., 0., 0.),
+                input: cartesian::Coordinates::default().with_x(-1.),
                 output: Coordinates::default()
                     .with_longitude(Longitude::from(PI))
                     .with_altitude(Altitude::from(1.)),
