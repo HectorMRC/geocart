@@ -1,5 +1,8 @@
 //! Transform definitions and implementations.
 
+mod axis;
+pub use axis::*;
+
 mod rotation;
 pub use rotation::*;
 

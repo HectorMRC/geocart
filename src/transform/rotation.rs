@@ -15,7 +15,7 @@ use super::Transform;
 ///
 /// use globe_rs::{
 ///     cartesian::Coordinates,
-///     transform::{Rotation, Transform},
+///     transform::{Axis, Rotation, Transform},
 /// };
 ///
 /// // due precision error both values may not be exactly the same
@@ -23,7 +23,7 @@ use super::Transform;
 ///
 ///
 /// let rotated = Rotation::default()
-///     .with_axis(Coordinates::default().with_x(1.))
+///     .with_axis(Axis::X)
 ///     .with_theta(FRAC_PI_2.into())
 ///     .transform(Coordinates::default().with_y(1.));
 ///
@@ -75,7 +75,11 @@ impl Transform<Coordinates> for Rotation {
 
 impl Rotation {
     /// Sets as the rotation axis the normal vector pointing from the origin to the given [`Coordinates`].
-    pub fn with_axis(mut self, coords: Coordinates) -> Self {
+    pub fn with_axis<T>(mut self, coords: T) -> Self
+    where
+        T: Into<Coordinates>,
+    {
+        let coords = coords.into();
         let magnitude = coords.distance(&Coordinates::default());
         self.axis = coords / magnitude;
         self
@@ -95,7 +99,7 @@ mod tests {
         cartesian::Coordinates,
         radian::Radian,
         tests::approx_eq,
-        transform::{Rotation, Transform},
+        transform::{Axis, Rotation, Transform},
     };
 
     #[test]
@@ -114,49 +118,49 @@ mod tests {
             Test {
                 name: "full rotation on the x axis must not change the y point",
                 theta: Radian::from(2. * PI),
-                axis: Coordinates::default().with_x(1.),
+                axis: Axis::X.into(),
                 input: Coordinates::default().with_y(1.),
                 output: Coordinates::default().with_y(1.),
             },
             Test {
                 name: "half of a whole rotation on the x axis must change the y point",
                 theta: Radian::from(PI),
-                axis: Coordinates::default().with_x(1.),
+                axis: Axis::X.into(),
                 input: Coordinates::default().with_y(1.),
                 output: Coordinates::default().with_y(-1.),
             },
             Test {
                 name: "a quarter of a whole rotation on the x axis must change the y point",
                 theta: Radian::from(FRAC_PI_2),
-                axis: Coordinates::default().with_x(1.),
+                axis: Axis::X.into(),
                 input: Coordinates::default().with_y(1.),
                 output: Coordinates::default().with_z(1.),
             },
             Test {
                 name: "full rotation on the z axis must not change the y point",
                 theta: Radian::from(2. * PI),
-                axis: Coordinates::default().with_z(1.),
+                axis: Axis::Z.into(),
                 input: Coordinates::default().with_y(1.),
                 output: Coordinates::default().with_y(1.),
             },
             Test {
                 name: "half of a whole rotation on the z axis must change the y point",
                 theta: Radian::from(PI),
-                axis: Coordinates::default().with_z(1.),
+                axis: Axis::Z.into(),
                 input: Coordinates::default().with_y(1.),
                 output: Coordinates::default().with_y(-1.),
             },
             Test {
                 name: "a quarter of a whole rotation on the z axis must change the y point",
                 theta: Radian::from(FRAC_PI_2),
-                axis: Coordinates::default().with_z(1.),
+                axis: Axis::Z.into(),
                 input: Coordinates::default().with_y(1.),
                 output: Coordinates::default().with_x(-1.),
             },
             Test {
                 name: "rotate over itself must not change the point",
                 theta: Radian::from(FRAC_PI_2),
-                axis: Coordinates::default().with_y(1.),
+                axis: Axis::Y.into(),
                 input: Coordinates::default().with_y(1.),
                 output: Coordinates::default().with_y(1.),
             },
