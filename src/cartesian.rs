@@ -60,28 +60,26 @@ impl IntoIterator for Coordinates {
 impl Div<Float> for Coordinates {
     type Output = Self;
 
-    fn div(mut self, rhs: Float) -> Self::Output {
-        self.x /= rhs;
-        self.y /= rhs;
-        self.z /= rhs;
-        self
+    fn div(self, rhs: Float) -> Self::Output {
+        Self {
+            x: self.x / rhs,
+            y: self.y / rhs,
+            z: self.z / rhs,
+        }
     }
 }
 
 impl Coordinates {
-    pub fn with_x(mut self, x: Float) -> Self {
-        self.x = x;
-        self
+    pub fn with_x(self, x: Float) -> Self {
+        Self { x, ..self }
     }
 
-    pub fn with_y(mut self, y: Float) -> Self {
-        self.y = y;
-        self
+    pub fn with_y(self, y: Float) -> Self {
+        Self { y, ..self }
     }
 
-    pub fn with_z(mut self, z: Float) -> Self {
-        self.z = z;
-        self
+    pub fn with_z(self, z: Float) -> Self {
+        Self { z, ..self }
     }
 
     /// Returns the distance between self and the given point.
