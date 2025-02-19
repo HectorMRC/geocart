@@ -188,19 +188,16 @@ impl From<cartesian::Coordinates> for Coordinates {
 }
 
 impl Coordinates {
-    pub fn with_longitude(mut self, longitude: Longitude) -> Self {
-        self.longitude = longitude;
-        self
+    pub fn with_longitude(self, longitude: Longitude) -> Self {
+        Self { longitude, ..self }
     }
 
-    pub fn with_latitude(mut self, latitude: Latitude) -> Self {
-        self.latitude = latitude;
-        self
+    pub fn with_latitude(self, latitude: Latitude) -> Self {
+        Self { latitude, ..self }
     }
 
-    pub fn with_altitude(mut self, altitude: Altitude) -> Self {
-        self.altitude = altitude;
-        self
+    pub fn with_altitude(self, altitude: Altitude) -> Self {
+        Self { altitude, ..self }
     }
 
     /// Computes the [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance) from self to the given point (in radiants).

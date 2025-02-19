@@ -75,19 +75,20 @@ impl Transform<Coordinates> for Rotation {
 
 impl Rotation {
     /// Sets as the rotation axis the normal vector pointing from the origin to the given [`Coordinates`].
-    pub fn with_axis<T>(mut self, coords: T) -> Self
+    pub fn with_axis<T>(self, coords: T) -> Self
     where
         T: Into<Coordinates>,
     {
         let coords = coords.into();
         let magnitude = coords.distance(&Coordinates::default());
-        self.axis = coords / magnitude;
-        self
+        Self {
+            axis: coords / magnitude,
+            ..self
+        }
     }
 
-    pub fn with_theta(mut self, theta: Radian) -> Self {
-        self.theta = theta;
-        self
+    pub fn with_theta(self, theta: Radian) -> Self {
+        Self { theta, ..self }
     }
 }
 

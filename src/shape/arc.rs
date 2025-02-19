@@ -50,14 +50,12 @@ impl Arc {
         }
     }
 
-    pub fn with_from(mut self, from: geographic::Coordinates) -> Self {
-        self.from = from;
-        self
+    pub fn with_from(self, from: geographic::Coordinates) -> Self {
+        Self { from, ..self }
     }
 
-    pub fn with_to(mut self, to: geographic::Coordinates) -> Self {
-        self.to = to;
-        self
+    pub fn with_to(self, to: geographic::Coordinates) -> Self {
+        Self { to, ..self }
     }
 }
 
