@@ -169,7 +169,7 @@ impl Altitude {
     }
 }
 
-/// Coordinates accodring to the geographical system of coordinates.
+/// Coordinates according to the geographical system of coordinates.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Coordinates {
