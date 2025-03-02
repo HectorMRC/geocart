@@ -1,6 +1,9 @@
 //! Geographic system of coordinates.
 
-use crate::{cartesian, Float, PositiveFloat, FRAC_PI_2, PI, TAU};
+use crate::{
+    cartesian,
+    float::{Float, PositiveFloat, FRAC_PI_2, PI, TAU},
+};
 
 /// Represents the horizontal axis in a geographic system of coordinates.
 ///

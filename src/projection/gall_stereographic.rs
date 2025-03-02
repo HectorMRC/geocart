@@ -1,6 +1,10 @@
 //! Gall Stereographic projection.
 
-use crate::{cartesian, geographic, Float, PositiveFloat};
+use crate::{
+    cartesian,
+    float::{Float, PositiveFloat},
+    geographic,
+};
 
 use super::Projection;
 

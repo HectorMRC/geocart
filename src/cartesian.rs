@@ -2,7 +2,11 @@
 
 use std::ops::Div;
 
-use crate::{geographic, transform::Transform, Float, FRAC_PI_2, PI};
+use crate::{
+    float::{Float, FRAC_PI_2, PI},
+    geographic,
+    transform::Transform,
+};
 
 /// Coordinates according to the cartesian system of coordinates.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]

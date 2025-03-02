@@ -1,6 +1,6 @@
 //! Arc shape iterator.
 
-use crate::{cartesian, geographic, transform::Rotation, Float};
+use crate::{cartesian, float::Float, geographic, transform::Rotation};
 
 /// Represents the arc shape between two points in a globe.
 #[derive(Debug, Clone, Copy)]

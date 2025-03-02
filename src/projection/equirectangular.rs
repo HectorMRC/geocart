@@ -1,6 +1,6 @@
 //! Equirectangular projection.
 
-use crate::{cartesian, geographic, PositiveFloat};
+use crate::{cartesian, float::PositiveFloat, geographic};
 
 use super::Projection;
 
