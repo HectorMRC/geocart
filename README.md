@@ -1,4 +1,4 @@
-# globe-rs
+# globe
 
 [![Continuos Integration](https://github.com/hectormrc/globe-rs/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hectormrc/globe-rs/actions/workflows/ci.yml)
 [![Code Coverage](https://codecov.io/github/hectormrc/globe-rs/coverage.svg?branch=main&token=)](https://codecov.io/gh/hectormrc/globe-rs)
