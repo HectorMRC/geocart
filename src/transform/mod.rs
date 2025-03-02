@@ -8,6 +8,6 @@ pub use rotation::*;
 
 /// A geometric transformation.
 pub trait Transform<Rhs> {
-    /// Performs the geometric over `Rhs`.
+    /// Performs the transformation over `Rhs`.
     fn transform(&self, point: Rhs) -> Rhs;
 }
