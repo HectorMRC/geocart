@@ -1,7 +1,7 @@
 # globe
 
-[![Continuos Integration](https://github.com/hectormrc/globe-rs/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hectormrc/globe-rs/actions/workflows/ci.yml)
-[![Code Coverage](https://codecov.io/github/hectormrc/globe-rs/coverage.svg?branch=main&token=)](https://codecov.io/gh/hectormrc/globe-rs)
+[![Continuos Integration](https://github.com/hectormrc/globe/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hectormrc/globe/actions/workflows/ci.yml)
+[![Code Coverage](https://codecov.io/github/hectormrc/globe/coverage.svg?branch=main&token=)](https://codecov.io/gh/hectormrc/globe)
 [![Crates.io: globe-rs](https://img.shields.io/crates/v/globe-rs.svg)](https://crates.io/crates/globe-rs)
 
 A bridge between geographic and cartesian coordinates.
