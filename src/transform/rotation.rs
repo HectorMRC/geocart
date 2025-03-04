@@ -47,7 +47,7 @@ pub struct Rotation {
 
 impl Transform<Coordinates> for Rotation {
     fn transform(&self, coords: Coordinates) -> Coordinates {
-        if self.theta == Radian::MIN {
+        if self.theta == Radian::default() {
             return coords;
         }
 

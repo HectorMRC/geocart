@@ -33,9 +33,6 @@ impl Mul<Float> for Radian {
 }
 
 impl Radian {
-    /// Smallest radian value.
-    pub const MIN: Self = Self(PositiveFloat::MIN);
-
     /// Returns the value as a [`Float`].
     pub fn as_float(&self) -> Float {
         self.0.as_float()
