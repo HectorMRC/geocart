@@ -13,7 +13,7 @@ pub(crate) type Float = f64;
 pub(crate) use std::f64::consts::{FRAC_PI_2, PI, TAU};
 
 /// A [`Float`] that is always positive.
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PositiveFloat(Float);
 
@@ -23,25 +23,7 @@ impl From<Float> for PositiveFloat {
     }
 }
 
-impl From<PositiveFloat> for Float {
-    fn from(value: PositiveFloat) -> Self {
-        value.0
-    }
-}
-
 impl Eq for PositiveFloat {}
-
-impl Ord for PositiveFloat {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.0.total_cmp(&other.0)
-    }
-}
-
-impl PartialOrd for PositiveFloat {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
 
 impl PositiveFloat {
     /// Smallest positive [`Float`] value.
