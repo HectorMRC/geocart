@@ -28,8 +28,6 @@ impl Eq for PositiveFloat {}
 impl PositiveFloat {
     /// Smallest positive [`Float`] value.
     pub const MIN: Self = Self(0.);
-    /// Largest finite [`Float`] value.
-    pub const MAX: Self = Self(Float::MAX);
 
     /// Returns the value as a [`Float`].
     pub fn as_float(self) -> Float {
