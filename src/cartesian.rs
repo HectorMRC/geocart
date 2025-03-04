@@ -20,7 +20,7 @@ pub struct Coordinates {
 impl From<geographic::Coordinates> for Coordinates {
     fn from(coords: geographic::Coordinates) -> Self {
         let radial_distance = match coords.altitude.as_float() {
-            altitude if altitude == 0. => 1.,
+            0. => 1.,
             altitude => altitude,
         };
 
