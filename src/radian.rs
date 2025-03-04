@@ -1,6 +1,6 @@
 //! Radian unit.
 
-use std::ops::{Mul, MulAssign};
+use std::ops::Mul;
 
 use crate::float::{Float, PositiveFloat, TAU};
 
@@ -29,12 +29,6 @@ impl Mul<Float> for Radian {
 
     fn mul(self, rhs: Float) -> Self::Output {
         Self::from(self.as_float() * rhs)
-    }
-}
-
-impl MulAssign<Float> for Radian {
-    fn mul_assign(&mut self, rhs: Float) {
-        *self = (self.as_float() * rhs).into();
     }
 }
 
