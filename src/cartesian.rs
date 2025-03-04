@@ -101,8 +101,8 @@ impl Coordinates {
 mod tests {
     use crate::{
         cartesian::Coordinates,
+        float::{FRAC_PI_2, PI},
         geographic::{self, Latitude, Longitude},
-        FRAC_PI_2, PI,
     };
 
     #[test]

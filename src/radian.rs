@@ -50,9 +50,10 @@ impl Radian {
 
 #[cfg(test)]
 mod tests {
-    use std::f64::consts::{FRAC_PI_2, PI, TAU};
-
-    use crate::{radian::Radian, Float};
+    use crate::{
+        float::{Float, FRAC_PI_2, PI, TAU},
+        radian::Radian,
+    };
 
     #[test]
     fn radiant_must_not_exceed_boundaries() {

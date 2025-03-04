@@ -217,9 +217,9 @@ impl Coordinates {
 mod tests {
     use crate::{
         cartesian,
+        float::{Float, FRAC_PI_2, PI},
         geographic::{Altitude, Coordinates, Latitude, Longitude},
         tests::approx_eq,
-        Float, FRAC_PI_2, PI,
     };
 
     #[test]
