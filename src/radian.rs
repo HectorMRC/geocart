@@ -1,6 +1,6 @@
 //! Radian unit.
 
-use std::ops::MulAssign;
+use std::ops::{Mul, MulAssign};
 
 use crate::float::{Float, PositiveFloat, TAU};
 
@@ -24,6 +24,14 @@ impl From<Float> for Radian {
     }
 }
 
+impl Mul<Float> for Radian {
+    type Output = Self;
+
+    fn mul(self, rhs: Float) -> Self::Output {
+        Self::from(self.as_float() * rhs)
+    }
+}
+
 impl MulAssign<Float> for Radian {
     fn mul_assign(&mut self, rhs: Float) {
         *self = (self.as_float() * rhs).into();
@@ -33,8 +41,6 @@ impl MulAssign<Float> for Radian {
 impl Radian {
     /// Smallest radian value.
     pub const MIN: Self = Self(PositiveFloat::MIN);
-    /// Largest radian value.
-    pub const MAX: Self = Self(PositiveFloat(TAU - Float::MIN_POSITIVE));
 
     /// Returns the value as a [`Float`].
     pub fn as_float(&self) -> Float {

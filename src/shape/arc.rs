@@ -1,6 +1,6 @@
 //! Arc shape iterator.
 
-use crate::{cartesian, float::Float, geographic, transform::Rotation};
+use crate::{cartesian, float::Float, geographic, transform::Rotation, transform::Transform};
 
 /// Represents the arc shape between two points in a globe.
 #[derive(Debug, Clone, Copy)]
@@ -31,12 +31,12 @@ impl IntoIterator for Arc {
         ArcIter {
             from,
             to,
+            total_segments: self.segments,
+            next_segment: 0,
             rotation: Rotation {
                 axis: cross / cross.distance(&Default::default()),
                 theta: (dot.acos() / self.segments as Float).into(),
             },
-            current_segment: 0,
-            total_segments: self.segments,
         }
     }
 }
@@ -60,12 +60,12 @@ impl Arc {
 }
 
 /// Iterator over the [`Arc`] shape.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug)]
 pub struct ArcIter {
     from: cartesian::Coordinates,
     to: cartesian::Coordinates,
-    current_segment: usize,
     total_segments: usize,
+    next_segment: usize,
     rotation: Rotation,
 }
 
@@ -73,24 +73,21 @@ impl Iterator for ArcIter {
     type Item = geographic::Coordinates;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current_segment > self.total_segments || self.total_segments == 0 {
+        if self.next_segment > self.total_segments {
             return None;
         }
 
-        let segment = self.current_segment;
-        self.current_segment += 1;
-
-        if self.current_segment == 0 {
-            return Some(self.from.into());
-        }
-
-        if self.current_segment == self.total_segments {
+        if self.next_segment == self.total_segments {
             return Some(self.to.into());
         }
 
-        let mut rotation = self.rotation;
-        rotation.theta *= segment as Float;
+        let next = self
+            .rotation
+            .with_theta(self.rotation.theta * self.next_segment as Float)
+            .transform(self.from)
+            .into();
 
-        Some(self.from.transform(rotation).into())
+        self.next_segment += 1;
+        Some(next)
     }
 }
