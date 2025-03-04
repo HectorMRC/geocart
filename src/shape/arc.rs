@@ -2,7 +2,7 @@
 
 use crate::{cartesian, float::Float, geographic, transform::Rotation, transform::Transform};
 
-/// Represents the arc shape between two points in a globe.
+/// Represents the arc shape between two points in a geocart.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Arc {

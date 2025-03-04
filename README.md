@@ -1,8 +1,8 @@
-# globe
+# geocart
 
-[![Continuos Integration](https://github.com/hectormrc/globe/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hectormrc/globe/actions/workflows/ci.yml)
-[![Code Coverage](https://codecov.io/github/hectormrc/globe/coverage.svg?branch=main&token=)](https://codecov.io/gh/hectormrc/globe)
-[![Crates.io: globe-rs](https://img.shields.io/crates/v/globe-rs.svg)](https://crates.io/crates/globe-rs)
+[![Continuos Integration](https://github.com/hectormrc/geocart/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hectormrc/geocart/actions/workflows/ci.yml)
+[![Code Coverage](https://codecov.io/github/hectormrc/geocart/coverage.svg?branch=main&token=)](https://codecov.io/gh/hectormrc/geocart)
+[![Crates.io: geocart](https://img.shields.io/crates/v/geocart.svg)](https://crates.io/crates/geocart)
 
 A bridge between geographic and cartesian coordinates.
 

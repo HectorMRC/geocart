@@ -13,7 +13,7 @@ use super::Transform;
 /// ```
 /// use std::f64::consts::FRAC_PI_2;
 ///
-/// use globe_rs::{
+/// use geocart::{
 ///     cartesian::Coordinates,
 ///     transform::{Axis, Rotation, Transform},
 /// };

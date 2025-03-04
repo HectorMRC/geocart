@@ -18,7 +18,7 @@ use crate::{
 /// ```
 /// use std::f64::consts::PI;
 ///
-/// use globe_rs::{geographic::Longitude};
+/// use geocart::{geographic::Longitude};
 ///
 /// assert_eq!(
 ///     Longitude::from(PI + 1.),
@@ -82,7 +82,7 @@ impl Longitude {
 /// ```
 /// use std::f64::consts::PI;
 ///
-/// use globe_rs::geographic::Latitude;
+/// use geocart::geographic::Latitude;
 ///
 /// let overflowing_latitude = Latitude::from(-5. * PI / 4.);
 /// let equivalent_latitude = Latitude::from(PI / 4.);
@@ -139,7 +139,7 @@ impl Latitude {
 ///
 /// ## Example
 /// ```
-/// use globe_rs::geographic::Altitude;
+/// use geocart::geographic::Altitude;
 ///
 /// assert_eq!(
 ///     Altitude::from(-1.56),
