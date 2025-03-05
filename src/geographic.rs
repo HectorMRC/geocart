@@ -152,7 +152,7 @@ pub struct Altitude(PositiveFloat);
 
 impl From<Float> for Altitude {
     fn from(value: Float) -> Self {
-        Self(value.abs().into())
+        Self(value.into())
     }
 }
 
