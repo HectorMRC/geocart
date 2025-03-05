@@ -19,5 +19,3 @@ default = ["f64"]
 f64 = []
 serde = ["dep:serde"]
 
-[lib]
-crate-type = ["cdylib", "rlib"]
