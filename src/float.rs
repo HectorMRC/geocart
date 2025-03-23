@@ -1,31 +1,26 @@
 //! Positive float definition.
 
-#[cfg(not(feature = "f64"))]
-pub(crate) type Float = f32;
-#[cfg(not(feature = "f64"))]
-pub(crate) use std::f32::consts::{FRAC_PI_2, PI, TAU};
-
-#[cfg(feature = "f64")]
-pub(crate) type Float = f64;
-#[cfg(feature = "f64")]
-pub(crate) use std::f64::consts::{FRAC_PI_2, PI, TAU};
+use num_traits::Signed;
 
 /// A [`Float`] that is always positive.
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PositiveFloat(Float);
+pub struct PositiveFloat<T>(T);
 
-impl From<Float> for PositiveFloat {
-    fn from(value: Float) -> Self {
+impl<T> From<T> for PositiveFloat<T>
+where
+    T: Signed,
+{
+    fn from(value: T) -> Self {
         Self(value.abs())
     }
 }
 
-impl Eq for PositiveFloat {}
+impl<T> Eq for PositiveFloat<T> where T: PartialEq {}
 
-impl PositiveFloat {
-    /// Returns the value as a [`Float`].
-    pub fn as_float(self) -> Float {
+impl<T> PositiveFloat<T> {
+    /// Returns the inner value.
+    pub fn into_inner(self) -> T {
         self.0
     }
 }

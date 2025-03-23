@@ -1,5 +1,7 @@
 //! Rotation transformation.
 
+use num_traits::Float;
+
 use crate::{cartesian::Coordinates, radian::Radian};
 
 use super::Transform;
@@ -38,22 +40,25 @@ use super::Transform;
 ///     });
 /// ```
 #[derive(Debug, Default, Clone, Copy)]
-pub struct Rotation {
+pub struct Rotation<T> {
     /// The axis of rotation about which perform the transformation.
-    pub axis: Coordinates,
+    pub axis: Coordinates<T>,
     /// The angle of rotation.
-    pub theta: Radian,
+    pub theta: Radian<T>,
 }
 
-impl Transform<Coordinates> for Rotation {
-    fn transform(&self, coords: Coordinates) -> Coordinates {
+impl<T> Transform<Coordinates<T>> for Rotation<T>
+where
+    T: Default + Float,
+{
+    fn transform(&self, coords: Coordinates<T>) -> Coordinates<T> {
         if self.theta == Radian::default() {
             return coords;
         }
 
-        let sin_theta = self.theta.as_float().sin();
-        let cos_theta = self.theta.as_float().cos();
-        let sub_1_cos_theta = 1. - cos_theta;
+        let sin_theta = self.theta.into_inner().sin();
+        let cos_theta = self.theta.into_inner().cos();
+        let sub_1_cos_theta = T::one() - cos_theta;
 
         let x = self.axis.x;
         let y = self.axis.y;
@@ -73,11 +78,14 @@ impl Transform<Coordinates> for Rotation {
     }
 }
 
-impl Rotation {
+impl<T> Rotation<T>
+where
+    T: Default + Float,
+{
     /// Sets as the rotation axis the normal vector pointing from the origin to the given [`Coordinates`].
-    pub fn with_axis<T>(self, coords: T) -> Self
+    pub fn with_axis<U>(self, coords: U) -> Self
     where
-        T: Into<Coordinates>,
+        U: Into<Coordinates<T>>,
     {
         let coords = coords.into();
         let magnitude = coords.distance(&Coordinates::default());
@@ -87,7 +95,7 @@ impl Rotation {
         }
     }
 
-    pub fn with_theta(self, theta: Radian) -> Self {
+    pub fn with_theta(self, theta: Radian<T>) -> Self {
         Self { theta, ..self }
     }
 }
@@ -109,10 +117,10 @@ mod tests {
 
         struct Test {
             name: &'static str,
-            theta: Radian,
-            axis: Coordinates,
-            input: Coordinates,
-            output: Coordinates,
+            theta: Radian<f64>,
+            axis: Coordinates<f64>,
+            input: Coordinates<f64>,
+            output: Coordinates<f64>,
         }
 
         vec![

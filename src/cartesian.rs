@@ -2,39 +2,40 @@
 
 use std::ops::Div;
 
-use crate::{
-    float::{Float, FRAC_PI_2, PI},
-    geographic,
-    transform::Transform,
-};
+use num_traits::{Float, FloatConst, Signed};
+
+use crate::{geographic, transform::Transform};
 
 /// Coordinates according to the cartesian system of coordinates.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Coordinates {
-    pub x: Float,
-    pub y: Float,
-    pub z: Float,
+pub struct Coordinates<T> {
+    pub x: T,
+    pub y: T,
+    pub z: T,
 }
 
-impl From<geographic::Coordinates> for Coordinates {
-    fn from(coords: geographic::Coordinates) -> Self {
-        let radial_distance = match coords.altitude.as_float() {
-            0. => 1.,
+impl<T> From<geographic::Coordinates<T>> for Coordinates<T>
+where
+    T: Signed + Float + FloatConst,
+{
+    fn from(coords: geographic::Coordinates<T>) -> Self {
+        let radial_distance = match coords.altitude.into_inner() {
+            altitude if altitude == T::zero() => T::one(),
             altitude => altitude,
         };
 
-        let theta = FRAC_PI_2 - coords.latitude.as_float();
-        let phi = coords.longitude.as_float();
+        let theta = T::FRAC_PI_2() - coords.latitude.into_inner();
+        let phi = coords.longitude.into_inner();
 
         // improves sin & cos precision for exact numbers
-        let precise_sin_cos = |rad: Float| -> (Float, Float) {
-            if rad.abs() == FRAC_PI_2 {
-                return (rad.signum(), 0.);
-            } else if rad.abs() == PI {
-                return (0., -1.);
-            } else if rad == 0. {
-                return (0., 1.);
+        let precise_sin_cos = |rad: T| -> (T, T) {
+            if rad.abs() == T::FRAC_PI_2() {
+                return (rad.signum(), T::zero());
+            } else if rad.abs() == T::PI() {
+                return (T::zero(), -T::one());
+            } else if rad == T::zero() {
+                return (T::zero(), T::one());
             }
 
             (rad.sin(), rad.cos())
@@ -51,20 +52,23 @@ impl From<geographic::Coordinates> for Coordinates {
     }
 }
 
-impl IntoIterator for Coordinates {
-    type Item = Float;
+impl<T> IntoIterator for Coordinates<T> {
+    type Item = T;
 
-    type IntoIter = std::array::IntoIter<Float, 3>;
+    type IntoIter = std::array::IntoIter<T, 3>;
 
     fn into_iter(self) -> Self::IntoIter {
         [self.x, self.y, self.z].into_iter()
     }
 }
 
-impl Div<Float> for Coordinates {
+impl<T> Div<T> for Coordinates<T>
+where
+    T: Copy + Div<Output = T>,
+{
     type Output = Self;
 
-    fn div(self, rhs: Float) -> Self::Output {
+    fn div(self, rhs: T) -> Self::Output {
         Self {
             x: self.x / rhs,
             y: self.y / rhs,
@@ -73,35 +77,41 @@ impl Div<Float> for Coordinates {
     }
 }
 
-impl Coordinates {
-    pub fn with_x(self, x: Float) -> Self {
+impl<T> Coordinates<T>
+where
+    T: Float,
+{
+    /// Returns the distance between self and the given point.
+    pub fn distance(&self, rhs: &Self) -> T {
+        ((self.x - rhs.x).powi(2) + (self.y - rhs.y).powi(2) + (self.z - rhs.z).powi(2)).sqrt()
+    }
+}
+
+impl<T> Coordinates<T> {
+    pub fn with_x(self, x: T) -> Self {
         Self { x, ..self }
     }
 
-    pub fn with_y(self, y: Float) -> Self {
+    pub fn with_y(self, y: T) -> Self {
         Self { y, ..self }
     }
 
-    pub fn with_z(self, z: Float) -> Self {
+    pub fn with_z(self, z: T) -> Self {
         Self { z, ..self }
     }
 
-    /// Returns the distance between self and the given point.
-    pub fn distance(&self, rhs: &Self) -> Float {
-        ((self.x - rhs.x).powi(2) + (self.y - rhs.y).powi(2) + (self.z - rhs.z).powi(2)).sqrt()
-    }
-
     /// Performs the given transformation over self.
-    pub fn transform<T: Transform<Self>>(self, transformation: T) -> Self {
+    pub fn transform<U: Transform<Self>>(self, transformation: U) -> Self {
         transformation.transform(self)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::{FRAC_PI_2, PI};
+
     use crate::{
         cartesian::Coordinates,
-        float::{FRAC_PI_2, PI},
         geographic::{self, Latitude, Longitude},
     };
 
@@ -109,8 +119,8 @@ mod tests {
     fn cartesian_from_geographic_must_not_fail() {
         struct Test {
             name: &'static str,
-            input: geographic::Coordinates,
-            output: Coordinates,
+            input: geographic::Coordinates<f64>,
+            output: Coordinates<f64>,
         }
 
         vec![
