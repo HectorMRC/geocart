@@ -1,9 +1,8 @@
 //! Geographic system of coordinates.
 
-use crate::{
-    cartesian,
-    float::{Float, PositiveFloat, FRAC_PI_2, PI, TAU},
-};
+use num_traits::{Euclid, Float, FloatConst, Signed};
+
+use crate::{cartesian, float::PositiveFloat};
 
 /// Represents the horizontal axis in a geographic system of coordinates.
 ///
@@ -27,44 +26,50 @@ use crate::{
 /// ```
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Longitude(Float);
+pub struct Longitude<T>(T);
 
-impl From<Float> for Longitude {
-    fn from(value: Float) -> Self {
+impl<T> From<T> for Longitude<T>
+where
+    T: Copy + PartialOrd + Signed + FloatConst + Euclid,
+{
+    fn from(value: T) -> Self {
         Self(
-            (-PI..PI)
+            (-T::PI()..T::PI())
                 .contains(&value)
                 .then_some(value)
                 .unwrap_or_else(|| {
                     // Both boundaries of the range are consecutive, which means that
                     // overflowing one is the same as continuing from the other one
                     // in the same direction.
-                    (value + PI).rem_euclid(TAU) - PI
+                    (value + T::PI()).rem_euclid(&T::TAU()) - T::PI()
                 }),
         )
     }
 }
 
-impl From<cartesian::Coordinates> for Longitude {
+impl<T> From<cartesian::Coordinates<T>> for Longitude<T>
+where
+    T: PartialOrd + Signed + Float + FloatConst + Euclid,
+{
     /// Computes the [Longitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
-    fn from(point: cartesian::Coordinates) -> Self {
+    fn from(point: cartesian::Coordinates<T>) -> Self {
         match (point.x, point.y) {
-            (x, y) if x > 0. => (y / x).atan(),
-            (x, y) if x < 0. && y >= 0. => (y / x).atan() + PI,
-            (x, y) if x < 0. && y < 0. => (y / x).atan() - PI,
-            (x, y) if x == 0. && y > 0. => FRAC_PI_2,
-            (x, y) if x == 0. && y < 0. => -FRAC_PI_2,
-            (x, y) if x == 0. && y == 0. => 0., // fallback value
+            (x, y) if x > T::zero() => (y / x).atan(),
+            (x, y) if x < T::zero() && y >= T::zero() => (y / x).atan() + T::PI(),
+            (x, y) if x < T::zero() && y < T::zero() => (y / x).atan() - T::PI(),
+            (x, y) if x == T::zero() && y > T::zero() => T::FRAC_PI_2(),
+            (x, y) if x == T::zero() && y < T::zero() => -T::FRAC_PI_2(),
+            (x, y) if x == T::zero() && y == T::zero() => T::zero(), // fallback value
 
-            _ => 0., // fallback value
+            _ => T::zero(), // fallback value
         }
         .into()
     }
 }
 
-impl Longitude {
-    /// Returns the value as a [`Float`].
-    pub fn as_float(&self) -> Float {
+impl<T> Longitude<T> {
+    /// Returns the inner value.
+    pub fn into_inner(self) -> T {
         self.0
     }
 }
@@ -91,17 +96,20 @@ impl Longitude {
 /// let abs_error = 0.0000000000000002;
 ///
 /// assert!(
-///     (equivalent_latitude.as_float() - overflowing_latitude.as_float()).abs() <= abs_error,
+///     (equivalent_latitude.into_inner() - overflowing_latitude.into_inner()).abs() <= abs_error,
 ///     "the overflowing latitude should be as the equivalent latitude ± e"
 /// );
 /// ```
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Latitude(Float);
+pub struct Latitude<T>(T);
 
-impl From<Float> for Latitude {
-    fn from(value: Float) -> Self {
-        Self(if (-FRAC_PI_2..=FRAC_PI_2).contains(&value) {
+impl<T> From<T> for Latitude<T>
+where
+    T: Signed + Float + FloatConst,
+{
+    fn from(value: T) -> Self {
+        Self(if (-T::FRAC_PI_2()..=T::FRAC_PI_2()).contains(&value) {
             value
         } else {
             value.sin().asin()
@@ -109,24 +117,29 @@ impl From<Float> for Latitude {
     }
 }
 
-impl From<cartesian::Coordinates> for Latitude {
+impl<T> From<cartesian::Coordinates<T>> for Latitude<T>
+where
+    T: Signed + Float + FloatConst,
+{
     /// Computes the [Latitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
-    fn from(point: cartesian::Coordinates) -> Self {
+    fn from(point: cartesian::Coordinates<T>) -> Self {
         let theta = match (point.x, point.y, point.z) {
-            (x, y, z) if z > 0. => Float::atan(Float::sqrt(x.powi(2) + y.powi(2)) / z),
-            (x, y, z) if z < 0. => PI + Float::atan(Float::sqrt(x.powi(2) + y.powi(2)) / z),
-            (x, y, z) if z == 0. && x * y != 0. => FRAC_PI_2,
+            (x, y, z) if z > T::zero() => Float::atan(Float::sqrt(x.powi(2) + y.powi(2)) / z),
+            (x, y, z) if z < T::zero() => {
+                T::PI() + Float::atan(Float::sqrt(x.powi(2) + y.powi(2)) / z)
+            }
+            (x, y, z) if z == T::zero() && x * y != T::zero() => T::FRAC_PI_2(),
             // (x, y, z) if x == y && y == z => FRAC_PI_2, // fallback value
-            _ => FRAC_PI_2, // fallback value
+            _ => T::FRAC_PI_2(), // fallback value
         };
 
-        (FRAC_PI_2 - theta).into()
+        (T::FRAC_PI_2() - theta).into()
     }
 }
 
-impl Latitude {
-    /// Returns the value as a [`Float`].
-    pub fn as_float(&self) -> Float {
+impl<T> Latitude<T> {
+    /// Returns the inner value.
+    pub fn into_inner(self) -> T {
         self.0
     }
 }
@@ -148,41 +161,50 @@ impl Latitude {
 /// ```
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Altitude(PositiveFloat);
+pub struct Altitude<T>(PositiveFloat<T>);
 
-impl From<Float> for Altitude {
-    fn from(value: Float) -> Self {
+impl<T> From<T> for Altitude<T>
+where
+    T: Signed,
+{
+    fn from(value: T) -> Self {
         Self(value.into())
     }
 }
 
-impl From<cartesian::Coordinates> for Altitude {
+impl<T> From<cartesian::Coordinates<T>> for Altitude<T>
+where
+    T: Signed + Float,
+{
     /// Computes the [Altitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
-    fn from(coords: cartesian::Coordinates) -> Self {
+    fn from(coords: cartesian::Coordinates<T>) -> Self {
         (coords.x.powi(2) + coords.y.powi(2) + coords.z.powi(2))
             .sqrt()
             .into()
     }
 }
 
-impl Altitude {
-    /// Returns the value as a [`Float`].
-    pub fn as_float(&self) -> Float {
-        self.0.as_float()
+impl<T> Altitude<T> {
+    /// Returns the inner value.
+    pub fn into_inner(self) -> T {
+        self.0.into_inner()
     }
 }
 
 /// Coordinates according to the geographical system of coordinates.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Coordinates {
-    pub longitude: Longitude,
-    pub latitude: Latitude,
-    pub altitude: Altitude,
+pub struct Coordinates<T> {
+    pub longitude: Longitude<T>,
+    pub latitude: Latitude<T>,
+    pub altitude: Altitude<T>,
 }
 
-impl From<cartesian::Coordinates> for Coordinates {
-    fn from(coords: cartesian::Coordinates) -> Self {
+impl<T> From<cartesian::Coordinates<T>> for Coordinates<T>
+where
+    T: PartialOrd + Default + Signed + Float + FloatConst + Euclid,
+{
+    fn from(coords: cartesian::Coordinates<T>) -> Self {
         Self::default()
             .with_longitude(coords.into())
             .with_latitude(coords.into())
@@ -190,34 +212,40 @@ impl From<cartesian::Coordinates> for Coordinates {
     }
 }
 
-impl Coordinates {
-    pub fn with_longitude(self, longitude: Longitude) -> Self {
-        Self { longitude, ..self }
-    }
-
-    pub fn with_latitude(self, latitude: Latitude) -> Self {
-        Self { latitude, ..self }
-    }
-
-    pub fn with_altitude(self, altitude: Altitude) -> Self {
-        Self { altitude, ..self }
-    }
-
+impl<T> Coordinates<T>
+where
+    T: Copy + Float,
+{
     /// Computes the [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance) from self to the given point (in radiants).
-    pub fn distance(&self, rhs: &Self) -> Float {
-        let prod_latitude_sin = self.latitude.as_float().sin() * rhs.latitude.as_float().sin();
-        let prod_latitude_cos = self.latitude.as_float().cos() * rhs.latitude.as_float().cos();
-        let longitude_diff = (self.longitude.as_float() - rhs.longitude.as_float()).abs();
+    pub fn distance(&self, rhs: &Self) -> T {
+        let prod_latitude_sin = self.latitude.into_inner().sin() * rhs.latitude.into_inner().sin();
+        let prod_latitude_cos = self.latitude.into_inner().cos() * rhs.latitude.into_inner().cos();
+        let longitude_diff = (self.longitude.into_inner() - rhs.longitude.into_inner()).abs();
 
         (prod_latitude_sin + prod_latitude_cos * longitude_diff.cos()).acos()
     }
 }
 
+impl<T> Coordinates<T> {
+    pub fn with_longitude(self, longitude: Longitude<T>) -> Self {
+        Self { longitude, ..self }
+    }
+
+    pub fn with_latitude(self, latitude: Latitude<T>) -> Self {
+        Self { latitude, ..self }
+    }
+
+    pub fn with_altitude(self, altitude: Altitude<T>) -> Self {
+        Self { altitude, ..self }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::{FRAC_PI_2, PI};
+
     use crate::{
         cartesian,
-        float::{Float, FRAC_PI_2, PI},
         geographic::{Altitude, Coordinates, Latitude, Longitude},
         tests::approx_eq,
     };
@@ -226,8 +254,8 @@ mod tests {
     fn longitude_must_not_exceed_boundaries() {
         struct Test {
             name: &'static str,
-            input: Float,
-            output: Float,
+            input: f64,
+            output: f64,
         }
 
         vec![
@@ -254,7 +282,7 @@ mod tests {
         ]
         .into_iter()
         .for_each(|test| {
-            let longitude: Float = Longitude::from(test.input).as_float();
+            let longitude = Longitude::from(test.input).into_inner();
 
             assert_eq!(
                 longitude, test.output,
@@ -266,12 +294,12 @@ mod tests {
 
     #[test]
     fn latitude_must_not_exceed_boundaries() {
-        const ABS_ERROR: Float = 0.0000000000000003;
+        const ABS_ERROR: f64 = 0.0000000000000003;
 
         struct Test {
             name: &'static str,
-            input: Float,
-            output: Float,
+            input: f64,
+            output: f64,
         }
 
         vec![
@@ -298,7 +326,7 @@ mod tests {
         ]
         .into_iter()
         .for_each(|test| {
-            let latitude: Float = Latitude::from(test.input).as_float();
+            let latitude = Latitude::from(test.input).into_inner();
 
             assert!(
                 approx_eq(latitude, test.output, ABS_ERROR),
@@ -314,8 +342,8 @@ mod tests {
     fn geographic_from_cartesian_must_not_fail() {
         struct Test {
             name: &'static str,
-            input: cartesian::Coordinates,
-            output: Coordinates,
+            input: cartesian::Coordinates<f64>,
+            output: Coordinates<f64>,
         }
 
         vec![
@@ -369,8 +397,8 @@ mod tests {
                 test.output.longitude,
                 "{}: got longitude = {}, want {}",
                 test.name,
-                point.longitude.as_float(),
-                test.output.longitude.as_float(),
+                point.longitude.into_inner(),
+                test.output.longitude.into_inner(),
             );
 
             assert_eq!(
@@ -378,8 +406,8 @@ mod tests {
                 test.output.latitude,
                 "{}: got latitude = {}, want {}",
                 test.name,
-                point.latitude.as_float(),
-                test.output.latitude.as_float(),
+                point.latitude.into_inner(),
+                test.output.latitude.into_inner(),
             );
 
             assert_eq!(
@@ -387,8 +415,8 @@ mod tests {
                 test.output.altitude,
                 "{}: got altitude = {}, want {}",
                 test.name,
-                point.altitude.as_float(),
-                test.output.altitude.as_float(),
+                point.altitude.into_inner(),
+                test.output.altitude.into_inner(),
             );
         });
     }
@@ -397,9 +425,9 @@ mod tests {
     fn distance_must_not_fail() {
         struct Test<'a> {
             name: &'a str,
-            from: Coordinates,
-            to: Coordinates,
-            distance: Float,
+            from: Coordinates<f64>,
+            to: Coordinates<f64>,
+            distance: f64,
         }
 
         vec![

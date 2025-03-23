@@ -1,20 +1,27 @@
 //! Arc shape iterator.
 
-use crate::{cartesian, float::Float, geographic, transform::Rotation, transform::Transform};
+use std::num::NonZeroUsize;
+
+use num_traits::{Euclid, Float, FloatConst, Signed};
+
+use crate::{cartesian, geographic, transform::Rotation, transform::Transform};
 
 /// Represents the arc shape between two points in a geocart.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Arc {
-    pub from: geographic::Coordinates,
-    pub to: geographic::Coordinates,
+pub struct Arc<T> {
+    pub from: geographic::Coordinates<T>,
+    pub to: geographic::Coordinates<T>,
     pub segments: usize,
 }
 
-impl IntoIterator for Arc {
-    type Item = geographic::Coordinates;
+impl<T> IntoIterator for Arc<T>
+where
+    T: Default + PartialOrd + Signed + Float + FloatConst + Euclid,
+{
+    type Item = geographic::Coordinates<T>;
 
-    type IntoIter = ArcIter;
+    type IntoIter = ArcIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
         let from = cartesian::Coordinates::from(self.from);
@@ -35,42 +42,53 @@ impl IntoIterator for Arc {
             next_segment: 0,
             rotation: Rotation {
                 axis: cross / cross.distance(&Default::default()),
-                theta: (dot.acos() / self.segments as Float).into(),
+                theta: T::from(self.segments)
+                    .map(|theta| dot.acos() / theta)
+                    .unwrap_or_default()
+                    .into(),
             },
         }
     }
 }
 
-impl Arc {
-    pub fn new(segments: usize) -> Self {
+impl<T> Arc<T>
+where
+    T: Default,
+{
+    pub fn new(segments: NonZeroUsize) -> Self {
         Self {
             from: Default::default(),
             to: Default::default(),
-            segments,
+            segments: segments.get(),
         }
     }
+}
 
-    pub fn with_from(self, from: geographic::Coordinates) -> Self {
+impl<T> Arc<T> {
+    pub fn with_from(self, from: geographic::Coordinates<T>) -> Self {
         Self { from, ..self }
     }
 
-    pub fn with_to(self, to: geographic::Coordinates) -> Self {
+    pub fn with_to(self, to: geographic::Coordinates<T>) -> Self {
         Self { to, ..self }
     }
 }
 
 /// Iterator over the [`Arc`] shape.
 #[derive(Debug)]
-pub struct ArcIter {
-    from: cartesian::Coordinates,
-    to: cartesian::Coordinates,
+pub struct ArcIter<T> {
+    from: cartesian::Coordinates<T>,
+    to: cartesian::Coordinates<T>,
     total_segments: usize,
     next_segment: usize,
-    rotation: Rotation,
+    rotation: Rotation<T>,
 }
 
-impl Iterator for ArcIter {
-    type Item = geographic::Coordinates;
+impl<T> Iterator for ArcIter<T>
+where
+    T: Default + PartialOrd + Signed + Float + FloatConst + Euclid,
+{
+    type Item = geographic::Coordinates<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next_segment > self.total_segments {
@@ -83,7 +101,7 @@ impl Iterator for ArcIter {
 
         let next = self
             .rotation
-            .with_theta(self.rotation.theta * self.next_segment as Float)
+            .with_theta(self.rotation.theta * T::from(self.next_segment)?)
             .transform(self.from)
             .into();
 

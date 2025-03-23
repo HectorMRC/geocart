@@ -2,56 +2,63 @@
 
 use std::ops::Mul;
 
-use crate::float::{Float, PositiveFloat, TAU};
+use num_traits::{Float, FloatConst, Signed};
+
+use crate::float::PositiveFloat;
 
 /// The [radian](https://en.wikipedia.org/wiki/Radian) unit, which is always a positive number within the range of [0, 2π).
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Radian(PositiveFloat);
+pub struct Radian<T>(PositiveFloat<T>);
 
-impl From<Float> for Radian {
-    fn from(value: Float) -> Self {
-        if (0. ..TAU).contains(&value) {
+impl<T> From<T> for Radian<T>
+where
+    T: Signed + Float + FloatConst,
+{
+    fn from(value: T) -> Self {
+        if (T::zero()..T::TAU()).contains(&value) {
             return Self(value.into());
         }
 
-        let mut modulus = value % TAU;
+        let mut modulus = value % T::TAU();
         if value.is_sign_negative() {
-            modulus = (modulus + TAU) % TAU;
+            modulus = (modulus + T::TAU()) % T::TAU();
         }
 
         Self(modulus.into())
     }
 }
 
-impl Mul<Float> for Radian {
+impl<T> Mul<T> for Radian<T>
+where
+    T: Signed + Float + FloatConst,
+{
     type Output = Self;
 
-    fn mul(self, rhs: Float) -> Self::Output {
-        Self::from(self.as_float() * rhs)
+    fn mul(self, rhs: T) -> Self::Output {
+        Self::from(self.into_inner() * rhs)
     }
 }
 
-impl Radian {
-    /// Returns the value as a [`Float`].
-    pub fn as_float(&self) -> Float {
-        self.0.as_float()
+impl<T> Radian<T> {
+    /// Returns the inner value.
+    pub fn into_inner(self) -> T {
+        self.0.into_inner()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        float::{Float, FRAC_PI_2, PI, TAU},
-        radian::Radian,
-    };
+    use std::f64::consts::{FRAC_PI_2, PI, TAU};
+
+    use crate::radian::Radian;
 
     #[test]
     fn radiant_must_not_exceed_boundaries() {
         struct Test {
             name: &'static str,
-            input: Float,
-            output: Float,
+            input: f64,
+            output: f64,
         }
 
         vec![
@@ -78,7 +85,7 @@ mod tests {
         ]
         .into_iter()
         .for_each(|test| {
-            let radiant = Radian::from(test.input).as_float();
+            let radiant = Radian::from(test.input).into_inner();
 
             assert_eq!(
                 radiant, test.output,
