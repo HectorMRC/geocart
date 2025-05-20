@@ -4,12 +4,13 @@ use std::ops::Mul;
 
 use num_traits::{Float, FloatConst, Signed};
 
-use crate::float::PositiveFloat;
+use crate::positive::Positive;
 
-/// The [radian](https://en.wikipedia.org/wiki/Radian) unit, which is always a positive number within the range of [0, 2π).
+/// The [radian](https://en.wikipedia.org/wiki/Radian) unit, which is always a positive number
+/// within the range of [0, 2π).
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Radian<T>(PositiveFloat<T>);
+pub struct Radian<T>(Positive<T>);
 
 impl<T> From<T> for Radian<T>
 where

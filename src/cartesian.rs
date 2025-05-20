@@ -4,22 +4,22 @@ use std::ops::Div;
 
 use num_traits::{Float, FloatConst, Signed};
 
-use crate::{geographic, transform::Transform};
+use crate::{geographic::Geographic, transform::Transform};
 
 /// Coordinates according to the cartesian system of coordinates.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Coordinates<T> {
+pub struct Cartesian<T> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 
-impl<T> From<geographic::Coordinates<T>> for Coordinates<T>
+impl<T> From<Geographic<T>> for Cartesian<T>
 where
     T: Signed + Float + FloatConst,
 {
-    fn from(coords: geographic::Coordinates<T>) -> Self {
+    fn from(coords: Geographic<T>) -> Self {
         let radial_distance = match coords.altitude.into_inner() {
             altitude if altitude == T::zero() => T::one(),
             altitude => altitude,
@@ -52,7 +52,7 @@ where
     }
 }
 
-impl<T> IntoIterator for Coordinates<T> {
+impl<T> IntoIterator for Cartesian<T> {
     type Item = T;
 
     type IntoIter = std::array::IntoIter<T, 3>;
@@ -62,7 +62,7 @@ impl<T> IntoIterator for Coordinates<T> {
     }
 }
 
-impl<T> Div<T> for Coordinates<T>
+impl<T> Div<T> for Cartesian<T>
 where
     T: Copy + Div<Output = T>,
 {
@@ -77,7 +77,7 @@ where
     }
 }
 
-impl<T> Coordinates<T>
+impl<T> Cartesian<T>
 where
     T: Float,
 {
@@ -87,7 +87,7 @@ where
     }
 }
 
-impl<T> Coordinates<T> {
+impl<T> Cartesian<T> {
     pub fn with_x(self, x: T) -> Self {
         Self { x, ..self }
     }
@@ -111,60 +111,58 @@ mod tests {
     use std::f64::consts::{FRAC_PI_2, PI};
 
     use crate::{
-        cartesian::Coordinates,
-        geographic::{self, Latitude, Longitude},
+        cartesian::Cartesian,
+        geographic::{Geographic, Latitude, Longitude},
     };
 
     #[test]
     fn cartesian_from_geographic_must_not_fail() {
         struct Test {
             name: &'static str,
-            input: geographic::Coordinates<f64>,
-            output: Coordinates<f64>,
+            input: Geographic<f64>,
+            output: Cartesian<f64>,
         }
 
         vec![
             Test {
                 name: "north point",
-                input: geographic::Coordinates::default().with_latitude(Latitude::from(FRAC_PI_2)),
-                output: Coordinates::default().with_z(1.),
+                input: Geographic::default().with_latitude(Latitude::from(FRAC_PI_2)),
+                output: Cartesian::default().with_z(1.),
             },
             Test {
                 name: "south point",
-                input: geographic::Coordinates::default().with_latitude(Latitude::from(-FRAC_PI_2)),
-                output: Coordinates::default().with_z(-1.),
+                input: Geographic::default().with_latitude(Latitude::from(-FRAC_PI_2)),
+                output: Cartesian::default().with_z(-1.),
             },
             Test {
                 name: "east point",
-                input: geographic::Coordinates::default()
-                    .with_longitude(Longitude::from(FRAC_PI_2)),
-                output: Coordinates::default().with_y(1.),
+                input: Geographic::default().with_longitude(Longitude::from(FRAC_PI_2)),
+                output: Cartesian::default().with_y(1.),
             },
             Test {
                 name: "weast point",
-                input: geographic::Coordinates::default()
-                    .with_longitude(Longitude::from(-FRAC_PI_2)),
-                output: Coordinates::default().with_y(-1.),
+                input: Geographic::default().with_longitude(Longitude::from(-FRAC_PI_2)),
+                output: Cartesian::default().with_y(-1.),
             },
             Test {
                 name: "front point",
-                input: geographic::Coordinates::default(),
-                output: Coordinates::default().with_x(1.),
+                input: Geographic::default(),
+                output: Cartesian::default().with_x(1.),
             },
             Test {
                 name: "back point as negative bound",
-                input: geographic::Coordinates::default().with_longitude(Longitude::from(-PI)),
-                output: Coordinates::default().with_x(-1.),
+                input: Geographic::default().with_longitude(Longitude::from(-PI)),
+                output: Cartesian::default().with_x(-1.),
             },
             Test {
                 name: "back point as positive bound",
-                input: geographic::Coordinates::default().with_longitude(Longitude::from(PI)),
-                output: Coordinates::default().with_x(-1.),
+                input: Geographic::default().with_longitude(Longitude::from(PI)),
+                output: Cartesian::default().with_x(-1.),
             },
         ]
         .into_iter()
         .for_each(|test| {
-            let from = Coordinates::from(test.input);
+            let from = Cartesian::from(test.input);
             let point = from;
             assert_eq!(
                 point, test.output,

@@ -1,4 +1,5 @@
 //! Shape implementations.
 
 mod arc;
-pub use arc::Arc;
+
+pub use self::arc::Arc;

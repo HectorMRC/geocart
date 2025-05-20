@@ -2,16 +2,18 @@
 
 use num_traits::{Euclid, Float, FloatConst, Signed};
 
-use crate::{cartesian, float::PositiveFloat};
+use crate::{cartesian::Cartesian, positive::Positive};
 
 /// Represents the horizontal axis in a geographic system of coordinates.
 ///
 /// ## Definition
-/// Since the longitude of a point on a sphere is the angle east (positive) or west (negative) in reference of the maridian zero, the longitude value must be in the range __[-π, +π)__.
+/// Since the longitude of a point on a sphere is the angle east (positive) or west (negative) in
+/// reference of the maridian zero, the longitude value must be in the range __[-π, +π)__.
 /// Any other value will be computed in order to set its equivalent inside that range.
 ///
 /// ### Overflow
-/// Both boundaries of the longitude range are consecutive, which means that overflowing one is the same as continuing from the other one in the same direction.
+/// Both boundaries of the longitude range are consecutive, which means that overflowing one is the
+/// same as continuing from the other one in the same direction.
 ///
 /// ## Example
 /// ```
@@ -33,26 +35,24 @@ where
     T: Copy + PartialOrd + Signed + FloatConst + Euclid,
 {
     fn from(value: T) -> Self {
-        Self(
-            (-T::PI()..T::PI())
-                .contains(&value)
-                .then_some(value)
-                .unwrap_or_else(|| {
-                    // Both boundaries of the range are consecutive, which means that
-                    // overflowing one is the same as continuing from the other one
-                    // in the same direction.
-                    (value + T::PI()).rem_euclid(&T::TAU()) - T::PI()
-                }),
-        )
+        Self(if (-T::PI()..T::PI()).contains(&value) {
+            value
+        } else {
+            // Both boundaries of the range are consecutive, which means that
+            // overflowing one is the same as continuing from the other one
+            // in the same direction.
+            (value + T::PI()).rem_euclid(&T::TAU()) - T::PI()
+        })
     }
 }
 
-impl<T> From<cartesian::Coordinates<T>> for Longitude<T>
+impl<T> From<Cartesian<T>> for Longitude<T>
 where
     T: PartialOrd + Signed + Float + FloatConst + Euclid,
 {
-    /// Computes the [Longitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
-    fn from(point: cartesian::Coordinates<T>) -> Self {
+    /// Computes the [Longitude] of the given [Cartesian] as specified by the [Spherical coordinate
+    /// system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
+    fn from(point: Cartesian<T>) -> Self {
         match (point.x, point.y) {
             (x, y) if x > T::zero() => (y / x).atan(),
             (x, y) if x < T::zero() && y >= T::zero() => (y / x).atan() + T::PI(),
@@ -77,11 +77,14 @@ impl<T> Longitude<T> {
 /// Represents the vertical axis in a geographic system of coordinates.
 ///
 /// ## Definition
-/// Since the latitude of a point on a sphere is the angle between the equatorial plane and the straight line that goes through that point and the center of the sphere, the latitude value must be in the range __\[-π/2, +π/2\]__.
+/// Since the latitude of a point on a sphere is the angle between the equatorial plane and the
+/// straight line that goes through that point and the center of the sphere, the latitude value
+/// must be in the range __\[-π/2, +π/2\]__.
 /// Any other value must be computed in order to set its equivalent inside the range.
 ///
 /// ### Overflow
-/// Overflowing any of both boundaries of the latitude range behaves like moving away from that boundary and getting closer to the oposite one.
+/// Overflowing any of both boundaries of the latitude range behaves like moving away from that
+/// boundary and getting closer to the oposite one.
 ///
 /// ## Example
 /// ```
@@ -117,12 +120,13 @@ where
     }
 }
 
-impl<T> From<cartesian::Coordinates<T>> for Latitude<T>
+impl<T> From<Cartesian<T>> for Latitude<T>
 where
     T: Signed + Float + FloatConst,
 {
-    /// Computes the [Latitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
-    fn from(point: cartesian::Coordinates<T>) -> Self {
+    /// Computes the [Latitude] of the given [Cartesian] as specified by the [Spherical coordinate
+    /// system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
+    fn from(point: Cartesian<T>) -> Self {
         let theta = match (point.x, point.y, point.z) {
             (x, y, z) if z > T::zero() => Float::atan(Float::sqrt(x.powi(2) + y.powi(2)) / z),
             (x, y, z) if z < T::zero() => {
@@ -147,7 +151,8 @@ impl<T> Latitude<T> {
 /// Represents the radius in a geographic system of coordinates.
 ///
 /// ## Definition
-/// Since the altitude of a point on a sphere is the distance between that point and the center of the sphere, the altitude value must be positive.
+/// Since the altitude of a point on a sphere is the distance between that point and the center of
+/// the sphere, the altitude value must be positive.
 /// The absolute of any other value must be computed in order to get a proper radius notation.
 ///
 /// ## Example
@@ -161,7 +166,7 @@ impl<T> Latitude<T> {
 /// ```
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Altitude<T>(PositiveFloat<T>);
+pub struct Altitude<T>(Positive<T>);
 
 impl<T> From<T> for Altitude<T>
 where
@@ -172,12 +177,13 @@ where
     }
 }
 
-impl<T> From<cartesian::Coordinates<T>> for Altitude<T>
+impl<T> From<Cartesian<T>> for Altitude<T>
 where
     T: Signed + Float,
 {
-    /// Computes the [Altitude] of the given [Cartesian] as specified by the [Spherical coordinate system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
-    fn from(coords: cartesian::Coordinates<T>) -> Self {
+    /// Computes the [Altitude] of the given [Cartesian] as specified by the [Spherical coordinate
+    /// system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
+    fn from(coords: Cartesian<T>) -> Self {
         (coords.x.powi(2) + coords.y.powi(2) + coords.z.powi(2))
             .sqrt()
             .into()
@@ -194,17 +200,17 @@ impl<T> Altitude<T> {
 /// Coordinates according to the geographical system of coordinates.
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Coordinates<T> {
+pub struct Geographic<T> {
     pub longitude: Longitude<T>,
     pub latitude: Latitude<T>,
     pub altitude: Altitude<T>,
 }
 
-impl<T> From<cartesian::Coordinates<T>> for Coordinates<T>
+impl<T> From<Cartesian<T>> for Geographic<T>
 where
     T: PartialOrd + Default + Signed + Float + FloatConst + Euclid,
 {
-    fn from(coords: cartesian::Coordinates<T>) -> Self {
+    fn from(coords: Cartesian<T>) -> Self {
         Self::default()
             .with_longitude(coords.into())
             .with_latitude(coords.into())
@@ -212,11 +218,12 @@ where
     }
 }
 
-impl<T> Coordinates<T>
+impl<T> Geographic<T>
 where
     T: Copy + Float,
 {
-    /// Computes the [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance) from self to the given point (in radiants).
+    /// Computes the [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance)
+    /// from self to the given point (in radiants).
     pub fn distance(&self, rhs: &Self) -> T {
         let prod_latitude_sin = self.latitude.into_inner().sin() * rhs.latitude.into_inner().sin();
         let prod_latitude_cos = self.latitude.into_inner().cos() * rhs.latitude.into_inner().cos();
@@ -226,7 +233,7 @@ where
     }
 }
 
-impl<T> Coordinates<T> {
+impl<T> Geographic<T> {
     pub fn with_longitude(self, longitude: Longitude<T>) -> Self {
         Self { longitude, ..self }
     }
@@ -245,8 +252,8 @@ mod tests {
     use std::f64::consts::{FRAC_PI_2, PI};
 
     use crate::{
-        cartesian,
-        geographic::{Altitude, Coordinates, Latitude, Longitude},
+        cartesian::Cartesian,
+        geographic::{Altitude, Geographic, Latitude, Longitude},
         tests::approx_eq,
     };
 
@@ -342,55 +349,55 @@ mod tests {
     fn geographic_from_cartesian_must_not_fail() {
         struct Test {
             name: &'static str,
-            input: cartesian::Coordinates<f64>,
-            output: Coordinates<f64>,
+            input: Cartesian<f64>,
+            output: Geographic<f64>,
         }
 
         vec![
             Test {
                 name: "north point",
-                input: cartesian::Coordinates::default().with_z(1.),
-                output: Coordinates::default()
+                input: Cartesian::default().with_z(1.),
+                output: Geographic::default()
                     .with_latitude(Latitude::from(FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "south point",
-                input: cartesian::Coordinates::default().with_z(-1.),
-                output: Coordinates::default()
+                input: Cartesian::default().with_z(-1.),
+                output: Geographic::default()
                     .with_latitude(Latitude::from(-FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "east point",
-                input: cartesian::Coordinates::default().with_y(1.),
-                output: Coordinates::default()
+                input: Cartesian::default().with_y(1.),
+                output: Geographic::default()
                     .with_longitude(Longitude::from(FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "weast point",
-                input: cartesian::Coordinates::default().with_y(-1.),
-                output: Coordinates::default()
+                input: Cartesian::default().with_y(-1.),
+                output: Geographic::default()
                     .with_longitude(Longitude::from(-FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "front point",
-                input: cartesian::Coordinates::default().with_x(1.),
-                output: Coordinates::default().with_altitude(Altitude::from(1.)),
+                input: Cartesian::default().with_x(1.),
+                output: Geographic::default().with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "back point",
-                input: cartesian::Coordinates::default().with_x(-1.),
-                output: Coordinates::default()
+                input: Cartesian::default().with_x(-1.),
+                output: Geographic::default()
                     .with_longitude(Longitude::from(PI))
                     .with_altitude(Altitude::from(1.)),
             },
         ]
         .into_iter()
         .for_each(|test| {
-            let point = Coordinates::from(test.input);
+            let point = Geographic::from(test.input);
 
             assert_eq!(
                 point.longitude,
@@ -425,28 +432,28 @@ mod tests {
     fn distance_must_not_fail() {
         struct Test<'a> {
             name: &'a str,
-            from: Coordinates<f64>,
-            to: Coordinates<f64>,
+            from: Geographic<f64>,
+            to: Geographic<f64>,
             distance: f64,
         }
 
         vec![
             Test {
                 name: "Same point must be zero",
-                from: Coordinates::default(),
-                to: Coordinates::default(),
+                from: Geographic::default(),
+                to: Geographic::default(),
                 distance: 0.,
             },
             Test {
                 name: "Oposite points in the horizontal",
-                from: Coordinates::default(),
-                to: Coordinates::default().with_longitude(Longitude::from(-PI)),
+                from: Geographic::default(),
+                to: Geographic::default().with_longitude(Longitude::from(-PI)),
                 distance: PI,
             },
             Test {
                 name: "Oposite points in the vertical",
-                from: Coordinates::default().with_latitude(Latitude::from(FRAC_PI_2)),
-                to: Coordinates::default().with_latitude(Latitude::from(-FRAC_PI_2)),
+                from: Geographic::default().with_latitude(Latitude::from(FRAC_PI_2)),
+                to: Geographic::default().with_latitude(Latitude::from(-FRAC_PI_2)),
                 distance: PI,
             },
         ]

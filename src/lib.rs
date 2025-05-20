@@ -1,6 +1,6 @@
 pub mod cartesian;
-pub mod float;
 pub mod geographic;
+pub mod positive;
 pub mod projection;
 pub mod radian;
 pub mod shape;

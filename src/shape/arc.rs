@@ -4,14 +4,17 @@ use std::num::NonZeroUsize;
 
 use num_traits::{Euclid, Float, FloatConst, Signed};
 
-use crate::{cartesian, geographic, transform::Rotation, transform::Transform};
+use crate::{cartesian, geographic::Geographic, transform::Rotation, transform::Transform};
 
-/// Represents the arc shape between two points in a geocart.
+/// Represents the arc shape between two points in a globe.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Arc<T> {
-    pub from: geographic::Coordinates<T>,
-    pub to: geographic::Coordinates<T>,
+    /// The initial endpoint of the arc.
+    pub from: Geographic<T>,
+    /// The final endpoint of the arc.
+    pub to: Geographic<T>,
+    /// The total amount of segments (straight lines) the arc is made of.
     pub segments: usize,
 }
 
@@ -19,15 +22,15 @@ impl<T> IntoIterator for Arc<T>
 where
     T: Default + PartialOrd + Signed + Float + FloatConst + Euclid,
 {
-    type Item = geographic::Coordinates<T>;
+    type Item = Geographic<T>;
 
     type IntoIter = ArcIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let from = cartesian::Coordinates::from(self.from);
-        let to = cartesian::Coordinates::from(self.to);
+        let from = cartesian::Cartesian::from(self.from);
+        let to = cartesian::Cartesian::from(self.to);
 
-        let cross = cartesian::Coordinates {
+        let cross = cartesian::Cartesian {
             x: from.y * to.z - from.z * to.y,
             y: from.z * to.x - from.x * to.z,
             z: from.x * to.y - from.y * to.x,
@@ -65,11 +68,11 @@ where
 }
 
 impl<T> Arc<T> {
-    pub fn with_from(self, from: geographic::Coordinates<T>) -> Self {
+    pub fn with_from(self, from: Geographic<T>) -> Self {
         Self { from, ..self }
     }
 
-    pub fn with_to(self, to: geographic::Coordinates<T>) -> Self {
+    pub fn with_to(self, to: Geographic<T>) -> Self {
         Self { to, ..self }
     }
 }
@@ -77,8 +80,8 @@ impl<T> Arc<T> {
 /// Iterator over the [`Arc`] shape.
 #[derive(Debug)]
 pub struct ArcIter<T> {
-    from: cartesian::Coordinates<T>,
-    to: cartesian::Coordinates<T>,
+    from: cartesian::Cartesian<T>,
+    to: cartesian::Cartesian<T>,
     total_segments: usize,
     next_segment: usize,
     rotation: Rotation<T>,
@@ -88,7 +91,7 @@ impl<T> Iterator for ArcIter<T>
 where
     T: Default + PartialOrd + Signed + Float + FloatConst + Euclid,
 {
-    type Item = geographic::Coordinates<T>;
+    type Item = Geographic<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.next_segment > self.total_segments {

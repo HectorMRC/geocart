@@ -1,13 +1,13 @@
-//! Positive float definition.
+//! Positive definition.
 
 use num_traits::Signed;
 
-/// A [`Float`] that is always positive.
+/// A value that is always positive.
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PositiveFloat<T>(T);
+pub struct Positive<T>(T);
 
-impl<T> From<T> for PositiveFloat<T>
+impl<T> From<T> for Positive<T>
 where
     T: Signed,
 {
@@ -16,9 +16,9 @@ where
     }
 }
 
-impl<T> Eq for PositiveFloat<T> where T: PartialEq {}
+impl<T> Eq for Positive<T> where T: PartialEq {}
 
-impl<T> PositiveFloat<T> {
+impl<T> Positive<T> {
     /// Returns the inner value.
     pub fn into_inner(self) -> T {
         self.0

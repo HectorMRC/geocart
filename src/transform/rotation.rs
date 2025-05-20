@@ -2,21 +2,24 @@
 
 use num_traits::Float;
 
-use crate::{cartesian::Coordinates, radian::Radian};
+use crate::{cartesian::Cartesian, radian::Radian};
 
 use super::Transform;
 
-/// Implements the [geometric transformation](https://en.wikipedia.org/wiki/Rotation_matrix) through which an arbitrary cartesian point can be rotated given an axis and an angle of rotation.
+/// Implements the [geometric transformation](https://en.wikipedia.org/wiki/Rotation_matrix)
+/// through which an arbitrary cartesian point can be rotated given an axis and an angle of
+/// rotation.
 ///
 /// ## Statement
-/// Being v a vector in ℝ3 and k a unit vector describing an axis of rotation about which v rotates by an angle θ, the rotation transformation rotates v according to the right hand rule.
+/// Being v a vector in ℝ3 and k a unit vector describing an axis of rotation about which v rotates
+/// by an angle θ, the rotation transformation rotates v according to the right hand rule.
 ///
 /// ## Example
 /// ```
 /// use std::f64::consts::FRAC_PI_2;
 ///
 /// use geocart::{
-///     cartesian::Coordinates,
+///     cartesian::Cartesian,
 ///     transform::{Axis, Rotation, Transform},
 /// };
 ///
@@ -27,11 +30,11 @@ use super::Transform;
 /// let rotated = Rotation::default()
 ///     .with_axis(Axis::X)
 ///     .with_theta(FRAC_PI_2.into())
-///     .transform(Coordinates::default().with_y(1.));
+///     .transform(Cartesian::default().with_y(1.));
 ///
 /// rotated
 ///     .into_iter()
-///     .zip(Coordinates::default().with_z(1.))
+///     .zip(Cartesian::default().with_z(1.))
 ///     .for_each(|(got, want)| {
 ///         assert!(
 ///             (got - want).abs() <= ABS_ERROR,
@@ -42,16 +45,16 @@ use super::Transform;
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Rotation<T> {
     /// The axis of rotation about which perform the transformation.
-    pub axis: Coordinates<T>,
+    pub axis: Cartesian<T>,
     /// The angle of rotation.
     pub theta: Radian<T>,
 }
 
-impl<T> Transform<Coordinates<T>> for Rotation<T>
+impl<T> Transform<Cartesian<T>> for Rotation<T>
 where
     T: Default + Float,
 {
-    fn transform(&self, coords: Coordinates<T>) -> Coordinates<T> {
+    fn transform(&self, coords: Cartesian<T>) -> Cartesian<T> {
         if self.theta == Radian::default() {
             return coords;
         }
@@ -64,7 +67,7 @@ where
         let y = self.axis.y;
         let z = self.axis.z;
 
-        Coordinates {
+        Cartesian {
             x: coords.x * (cos_theta + x.powi(2) * sub_1_cos_theta)
                 + coords.y * (x * y * sub_1_cos_theta - z * sin_theta)
                 + coords.z * (x * z * sub_1_cos_theta + y * sin_theta),
@@ -82,13 +85,14 @@ impl<T> Rotation<T>
 where
     T: Default + Float,
 {
-    /// Sets as the rotation axis the normal vector pointing from the origin to the given [`Coordinates`].
+    /// Sets as the rotation axis the normal vector pointing from the origin to the given
+    /// [`Coordinates`].
     pub fn with_axis<U>(self, coords: U) -> Self
     where
-        U: Into<Coordinates<T>>,
+        U: Into<Cartesian<T>>,
     {
         let coords = coords.into();
-        let magnitude = coords.distance(&Coordinates::default());
+        let magnitude = coords.distance(&Cartesian::default());
         Self {
             axis: coords / magnitude,
             ..self
@@ -105,7 +109,7 @@ mod tests {
     use std::f64::consts::{FRAC_PI_2, PI};
 
     use crate::{
-        cartesian::Coordinates,
+        cartesian::Cartesian,
         radian::Radian,
         tests::approx_eq,
         transform::{Axis, Rotation, Transform},
@@ -118,9 +122,9 @@ mod tests {
         struct Test {
             name: &'static str,
             theta: Radian<f64>,
-            axis: Coordinates<f64>,
-            input: Coordinates<f64>,
-            output: Coordinates<f64>,
+            axis: Cartesian<f64>,
+            input: Cartesian<f64>,
+            output: Cartesian<f64>,
         }
 
         vec![
@@ -128,50 +132,50 @@ mod tests {
                 name: "full rotation on the x axis must not change the y point",
                 theta: Radian::from(2. * PI),
                 axis: Axis::X.into(),
-                input: Coordinates::default().with_y(1.),
-                output: Coordinates::default().with_y(1.),
+                input: Cartesian::default().with_y(1.),
+                output: Cartesian::default().with_y(1.),
             },
             Test {
                 name: "half of a whole rotation on the x axis must change the y point",
                 theta: Radian::from(PI),
                 axis: Axis::X.into(),
-                input: Coordinates::default().with_y(1.),
-                output: Coordinates::default().with_y(-1.),
+                input: Cartesian::default().with_y(1.),
+                output: Cartesian::default().with_y(-1.),
             },
             Test {
                 name: "a quarter of a whole rotation on the x axis must change the y point",
                 theta: Radian::from(FRAC_PI_2),
                 axis: Axis::X.into(),
-                input: Coordinates::default().with_y(1.),
-                output: Coordinates::default().with_z(1.),
+                input: Cartesian::default().with_y(1.),
+                output: Cartesian::default().with_z(1.),
             },
             Test {
                 name: "full rotation on the z axis must not change the y point",
                 theta: Radian::from(2. * PI),
                 axis: Axis::Z.into(),
-                input: Coordinates::default().with_y(1.),
-                output: Coordinates::default().with_y(1.),
+                input: Cartesian::default().with_y(1.),
+                output: Cartesian::default().with_y(1.),
             },
             Test {
                 name: "half of a whole rotation on the z axis must change the y point",
                 theta: Radian::from(PI),
                 axis: Axis::Z.into(),
-                input: Coordinates::default().with_y(1.),
-                output: Coordinates::default().with_y(-1.),
+                input: Cartesian::default().with_y(1.),
+                output: Cartesian::default().with_y(-1.),
             },
             Test {
                 name: "a quarter of a whole rotation on the z axis must change the y point",
                 theta: Radian::from(FRAC_PI_2),
                 axis: Axis::Z.into(),
-                input: Coordinates::default().with_y(1.),
-                output: Coordinates::default().with_x(-1.),
+                input: Cartesian::default().with_y(1.),
+                output: Cartesian::default().with_x(-1.),
             },
             Test {
                 name: "rotate over itself must not change the point",
                 theta: Radian::from(FRAC_PI_2),
                 axis: Axis::Y.into(),
-                input: Coordinates::default().with_y(1.),
-                output: Coordinates::default().with_y(1.),
+                input: Cartesian::default().with_y(1.),
+                output: Cartesian::default().with_y(1.),
             },
         ]
         .into_iter()

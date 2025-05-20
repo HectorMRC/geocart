@@ -12,10 +12,9 @@ serde = { version = "1.0.217", features = ["derive"], optional = true }
 num-traits = "0.2.19"
 
 [dev-dependencies]
-geocart = { path = ".", features = ["f64", "serde"] }
+geocart = { path = ".", features = ["serde"] }
 
 [features]
-default = ["f64"]
-f64 = []
+default = []
 serde = ["dep:serde"]
 

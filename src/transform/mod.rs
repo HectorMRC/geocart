@@ -1,10 +1,10 @@
 //! Transform definitions and implementations.
 
 mod axis;
-pub use axis::*;
-
 mod rotation;
-pub use rotation::*;
+
+pub use self::axis::Axis;
+pub use self::rotation::Rotation;
 
 /// A geometric transformation.
 pub trait Transform<Rhs> {

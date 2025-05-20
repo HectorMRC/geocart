@@ -1,17 +1,18 @@
 //! Projection definition and implementations.
 
 mod equirectangular;
-pub use equirectangular::Equirectangular;
-
 mod gall_stereographic;
-pub use gall_stereographic::GallStereographic;
 
-use crate::{cartesian, geographic};
+use crate::{cartesian::Cartesian, geographic::Geographic};
 
-/// A projection is a function that maps geographic coordinates to cartesian coordinates and vice versa.
+pub use self::equirectangular::Equirectangular;
+pub use self::gall_stereographic::GallStereographic;
+
+/// A projection is a function that maps geographic coordinates to cartesian coordinates and vice
+/// versa.
 pub trait Projection<T> {
     /// Projects the given geographic coordinates to cartesian coordinates.
-    fn forward(&self, coordinates: &geographic::Coordinates<T>) -> cartesian::Coordinates<T>;
+    fn forward(&self, coordinates: &Geographic<T>) -> Cartesian<T>;
     /// Unprojects the given cartesian coordinates to geographic coordinates.
-    fn reverse(&self, coordinates: &cartesian::Coordinates<T>) -> geographic::Coordinates<T>;
+    fn reverse(&self, coordinates: &Cartesian<T>) -> Geographic<T>;
 }
