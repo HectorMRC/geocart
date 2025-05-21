@@ -15,7 +15,7 @@ pub struct Arc<T> {
     /// The final endpoint of the arc.
     pub to: Geographic<T>,
     /// The total amount of segments (straight lines) the arc is made of.
-    pub segments: usize,
+    pub segments: NonZeroUsize,
 }
 
 impl<T> IntoIterator for Arc<T>
@@ -41,11 +41,11 @@ where
         ArcIter {
             from,
             to,
-            total_segments: self.segments,
+            total_segments: self.segments.get(),
             next_segment: 0,
             rotation: Rotation {
                 axis: cross / cross.distance(&Default::default()),
-                theta: T::from(self.segments)
+                theta: T::from(self.segments.get())
                     .map(|theta| dot.acos() / theta)
                     .unwrap_or_default()
                     .into(),
@@ -62,7 +62,7 @@ where
         Self {
             from: Default::default(),
             to: Default::default(),
-            segments: segments.get(),
+            segments,
         }
     }
 }
