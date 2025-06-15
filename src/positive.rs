@@ -1,6 +1,8 @@
 //! Positive definition.
 
-use num_traits::Signed;
+use std::ops::Add;
+
+use num_traits::{Signed, Zero};
 
 /// A value that is always positive.
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
@@ -13,6 +15,30 @@ where
 {
     fn from(value: T) -> Self {
         Self(value.abs())
+    }
+}
+
+impl<T> Add<Self> for Positive<T>
+where
+    T: Signed + Add<T, Output = T>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::from(self.0 + rhs.0)
+    }
+}
+
+impl<T> Zero for Positive<T>
+where
+    T: Signed + Zero,
+{
+    fn zero() -> Self {
+        Self(T::zero())
+    }
+
+    fn is_zero(&self) -> bool {
+        self.0.is_zero()
     }
 }
 
