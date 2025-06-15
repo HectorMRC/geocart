@@ -7,6 +7,12 @@ use num_traits::Signed;
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Positive<T>(T);
 
+impl<T> AsRef<T> for Positive<T> {
+    fn as_ref(&self) -> &T {
+        &self.0
+    }
+}
+
 impl<T> From<T> for Positive<T>
 where
     T: Signed,
