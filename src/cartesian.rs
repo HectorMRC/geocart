@@ -1,8 +1,8 @@
 //! Cartesian system of coordinates.
 
-use std::ops::Div;
+use std::ops::{Add, Div};
 
-use num_traits::{Float, FloatConst, Signed};
+use num_traits::{Float, FloatConst, One, Signed, Zero};
 
 use crate::{geographic::Geographic, transform::Transform};
 
@@ -62,6 +62,21 @@ impl<T> IntoIterator for Cartesian<T> {
     }
 }
 
+impl<T> Add<Self> for Cartesian<T>
+where
+    T: Copy + Add<Output = T>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Cartesian {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.y,
+        }
+    }
+}
+
 impl<T> Div<T> for Cartesian<T>
 where
     T: Copy + Div<Output = T>,
@@ -87,6 +102,20 @@ where
     }
 }
 
+impl<T> Cartesian<T>
+where
+    T: Zero,
+{
+    /// Returns the cartesian origin of coordinates.
+    pub fn origin() -> Self {
+        Cartesian {
+            x: T::zero(),
+            y: T::zero(),
+            z: T::zero(),
+        }
+    }
+}
+
 impl<T> Cartesian<T> {
     pub fn with_x(self, x: T) -> Self {
         Self { x, ..self }
@@ -103,6 +132,72 @@ impl<T> Cartesian<T> {
     /// Performs the given transformation over self.
     pub fn transform<U: Transform<Self>>(self, transformation: U) -> Self {
         transformation.transform(self)
+    }
+}
+
+/// A vector in a cartesian space.
+#[derive(Debug, Default, Clone, Copy)]
+pub struct Vector<T>(Cartesian<T>);
+
+impl<T> From<Cartesian<T>> for Vector<T> {
+    fn from(value: Cartesian<T>) -> Self {
+        Self(value)
+    }
+}
+
+impl<T> Vector<T>
+where
+    T: Float,
+{
+    /// Returns the magnitude of this vector.
+    pub fn magnitude(&self) -> T {
+        Cartesian::origin().distance(&self.0)
+    }
+
+    /// Returns the dot product between self and rhs.
+    pub fn dot(&self, rhs: &Self) -> T {
+        self.0.x * rhs.0.x + self.0.y * rhs.0.y + self.0.z * rhs.0.z
+    }
+
+    /// Returns the normalized vector of self.
+    pub fn normalize(self) -> Self {
+        (self.0 / self.magnitude()).into()
+    }
+
+    /// Computes the cross product between self and rhs.
+    pub fn cross(&self, rhs: &Self) -> Self {
+        Cartesian::origin()
+            .with_x(self.0.y * rhs.0.z - self.0.z * rhs.0.y)
+            .with_y(self.0.z * rhs.0.x - self.0.x * rhs.0.z)
+            .with_z(self.0.x * rhs.0.y - self.0.y * rhs.0.x)
+            .into()
+    }
+}
+
+impl<T> Vector<T>
+where
+    T: Zero + One,
+{
+    /// Returns the unit vector pointing the positive X axis.
+    pub fn x() -> Self {
+        Cartesian::origin().with_x(T::one()).into()
+    }
+
+    /// Returns the unit vector pointing the positive Y axis.
+    pub fn y() -> Self {
+        Cartesian::origin().with_y(T::one()).into()
+    }
+
+    /// Returns the unit vector pointing the positive Z axis.
+    pub fn z() -> Self {
+        Cartesian::origin().with_z(T::one()).into()
+    }
+}
+
+impl<T> Vector<T> {
+    /// Returns a reference to the [`Cartesian`] representation of this vector.
+    pub fn as_cartesian(&self) -> &Cartesian<T> {
+        &self.0
     }
 }
 
@@ -127,37 +222,37 @@ mod tests {
             Test {
                 name: "north point",
                 input: Geographic::default().with_latitude(Latitude::from(FRAC_PI_2)),
-                output: Cartesian::default().with_z(1.),
+                output: Cartesian::origin().with_z(1.),
             },
             Test {
                 name: "south point",
                 input: Geographic::default().with_latitude(Latitude::from(-FRAC_PI_2)),
-                output: Cartesian::default().with_z(-1.),
+                output: Cartesian::origin().with_z(-1.),
             },
             Test {
                 name: "east point",
                 input: Geographic::default().with_longitude(Longitude::from(FRAC_PI_2)),
-                output: Cartesian::default().with_y(1.),
+                output: Cartesian::origin().with_y(1.),
             },
             Test {
                 name: "weast point",
                 input: Geographic::default().with_longitude(Longitude::from(-FRAC_PI_2)),
-                output: Cartesian::default().with_y(-1.),
+                output: Cartesian::origin().with_y(-1.),
             },
             Test {
                 name: "front point",
                 input: Geographic::default(),
-                output: Cartesian::default().with_x(1.),
+                output: Cartesian::origin().with_x(1.),
             },
             Test {
                 name: "back point as negative bound",
                 input: Geographic::default().with_longitude(Longitude::from(-PI)),
-                output: Cartesian::default().with_x(-1.),
+                output: Cartesian::origin().with_x(-1.),
             },
             Test {
                 name: "back point as positive bound",
                 input: Geographic::default().with_longitude(Longitude::from(PI)),
-                output: Cartesian::default().with_x(-1.),
+                output: Cartesian::origin().with_x(-1.),
             },
         ]
         .into_iter()

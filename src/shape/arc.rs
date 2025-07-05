@@ -4,7 +4,11 @@ use std::num::NonZeroUsize;
 
 use num_traits::{Euclid, Float, FloatConst, Signed};
 
-use crate::{cartesian, geographic::Geographic, transform::Rotation, transform::Transform};
+use crate::{
+    cartesian::{self, Cartesian, Vector},
+    geographic::Geographic,
+    transform::{Rotation, Transform},
+};
 
 /// Represents the arc shape between two points in a globe.
 #[derive(Debug, Clone, Copy)]
@@ -27,29 +31,29 @@ where
     type IntoIter = ArcIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let from = cartesian::Cartesian::from(self.from);
-        let to = cartesian::Cartesian::from(self.to);
+        let from = Cartesian::from(self.from);
+        let to = Cartesian::from(self.to);
 
-        let cross = cartesian::Cartesian {
-            x: from.y * to.z - from.z * to.y,
-            y: from.z * to.x - from.x * to.z,
-            z: from.x * to.y - from.y * to.x,
+        let rotation = {
+            let from = Vector::from(from);
+            let to = Vector::from(to);
+
+            Rotation::noop().with_axis(from.cross(&to)).with_theta(
+                T::from(self.segments.get())
+                    .map(|segments| {
+                        (from.dot(&to) / (from.magnitude() * to.magnitude())).acos() / segments
+                    })
+                    .unwrap_or_default()
+                    .into(),
+            )
         };
-
-        let dot = from.x * to.x + from.y * to.y + from.z * to.z;
 
         ArcIter {
             from,
             to,
             total_segments: self.segments.get(),
             next_segment: 0,
-            rotation: Rotation {
-                axis: cross / cross.distance(&Default::default()),
-                theta: T::from(self.segments.get())
-                    .map(|theta| dot.acos() / theta)
-                    .unwrap_or_default()
-                    .into(),
-            },
+            rotation,
         }
     }
 }
@@ -102,8 +106,8 @@ where
             return Some(self.to.into());
         }
 
-        let next = self
-            .rotation
+        let next = Rotation::noop()
+            .with_axis(self.rotation.axis)
             .with_theta(self.rotation.theta * T::from(self.next_segment)?)
             .transform(self.from)
             .into();

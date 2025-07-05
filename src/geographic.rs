@@ -356,40 +356,40 @@ mod tests {
         vec![
             Test {
                 name: "north point",
-                input: Cartesian::default().with_z(1.),
+                input: Cartesian::origin().with_z(1.),
                 output: Geographic::default()
                     .with_latitude(Latitude::from(FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "south point",
-                input: Cartesian::default().with_z(-1.),
+                input: Cartesian::origin().with_z(-1.),
                 output: Geographic::default()
                     .with_latitude(Latitude::from(-FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "east point",
-                input: Cartesian::default().with_y(1.),
+                input: Cartesian::origin().with_y(1.),
                 output: Geographic::default()
                     .with_longitude(Longitude::from(FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "weast point",
-                input: Cartesian::default().with_y(-1.),
+                input: Cartesian::origin().with_y(-1.),
                 output: Geographic::default()
                     .with_longitude(Longitude::from(-FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "front point",
-                input: Cartesian::default().with_x(1.),
+                input: Cartesian::origin().with_x(1.),
                 output: Geographic::default().with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "back point",
-                input: Cartesian::default().with_x(-1.),
+                input: Cartesian::origin().with_x(-1.),
                 output: Geographic::default()
                     .with_longitude(Longitude::from(PI))
                     .with_altitude(Altitude::from(1.)),
