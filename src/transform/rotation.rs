@@ -130,7 +130,7 @@ mod tests {
             Test {
                 name: "noop rotation must not change the point",
                 theta: Radian::from(0.),
-                axis: Vector::default(),
+                axis: Cartesian::origin().into(),
                 input: Cartesian::origin().with_x(1.).with_y(2.).with_z(3.),
                 output: Cartesian::origin().with_x(1.).with_y(2.).with_z(3.),
             },

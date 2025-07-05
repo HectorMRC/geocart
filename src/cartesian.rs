@@ -1,6 +1,6 @@
 //! Cartesian system of coordinates.
 
-use std::ops::{Add, Div};
+use std::ops::Div;
 
 use num_traits::{Float, FloatConst, One, Signed, Zero};
 
@@ -52,6 +52,12 @@ where
     }
 }
 
+impl<T> From<Vector<T>> for Cartesian<T> {
+    fn from(value: Vector<T>) -> Self {
+        value.0
+    }
+}
+
 impl<T> IntoIterator for Cartesian<T> {
     type Item = T;
 
@@ -59,21 +65,6 @@ impl<T> IntoIterator for Cartesian<T> {
 
     fn into_iter(self) -> Self::IntoIter {
         [self.x, self.y, self.z].into_iter()
-    }
-}
-
-impl<T> Add<Self> for Cartesian<T>
-where
-    T: Copy + Add<Output = T>,
-{
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Cartesian {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.y,
-        }
     }
 }
 
@@ -137,7 +128,17 @@ impl<T> Cartesian<T> {
 
 /// A vector in a cartesian space.
 #[derive(Debug, Default, Clone, Copy)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Vector<T>(Cartesian<T>);
+
+impl<T> From<Geographic<T>> for Vector<T>
+where
+    T: Signed + Float + FloatConst,
+{
+    fn from(value: Geographic<T>) -> Self {
+        Cartesian::from(value).into()
+    }
+}
 
 impl<T> From<Cartesian<T>> for Vector<T> {
     fn from(value: Cartesian<T>) -> Self {

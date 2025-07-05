@@ -5,7 +5,7 @@ use std::num::NonZeroUsize;
 use num_traits::{Euclid, Float, FloatConst, Signed};
 
 use crate::{
-    cartesian::{self, Cartesian, Vector},
+    cartesian::{Cartesian, Vector},
     geographic::Geographic,
     transform::{Rotation, Transform},
 };
@@ -31,26 +31,27 @@ where
     type IntoIter = ArcIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let from = Cartesian::from(self.from);
-        let to = Cartesian::from(self.to);
+        let from = Vector::from(self.from).normalize();
+        let to = Vector::from(self.to).normalize();
 
-        let rotation = {
-            let from = Vector::from(from);
-            let to = Vector::from(to);
-
-            Rotation::noop().with_axis(from.cross(&to)).with_theta(
-                T::from(self.segments.get())
-                    .map(|segments| {
-                        (from.dot(&to) / (from.magnitude() * to.magnitude())).acos() / segments
-                    })
-                    .unwrap_or_default()
-                    .into(),
-            )
-        };
+        let rotation = Rotation::noop().with_axis(from.cross(&to)).with_theta(
+            T::from(self.segments.get())
+                .map(|segments| {
+                    // the formula for the angle (in radians) between the two vectors is the
+                    // arccosine of the division between the dot product and the product of the
+                    // magnitudes.
+                    //
+                    // Assuming both vectors are normalized (with magnitude = 1), the formula
+                    // can be simplified as the arccosine of the dot product.
+                    from.dot(&to).acos() / segments
+                })
+                .unwrap_or_default()
+                .into(),
+        );
 
         ArcIter {
-            from,
-            to,
+            from: from.into(),
+            to: to.into(),
             total_segments: self.segments.get(),
             next_segment: 0,
             rotation,
@@ -84,8 +85,8 @@ impl<T> Arc<T> {
 /// Iterator over the [`Arc`] shape.
 #[derive(Debug)]
 pub struct ArcIter<T> {
-    from: cartesian::Cartesian<T>,
-    to: cartesian::Cartesian<T>,
+    from: Cartesian<T>,
+    to: Cartesian<T>,
     total_segments: usize,
     next_segment: usize,
     rotation: Rotation<T>,
