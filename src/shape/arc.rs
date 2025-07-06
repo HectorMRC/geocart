@@ -5,9 +5,8 @@ use std::num::NonZeroUsize;
 use num_traits::{Euclid, Float, FloatConst, Signed};
 
 use crate::{
-    cartesian::{Cartesian, Vector},
-    geographic::Geographic,
     transform::{Rotation, Transform},
+    Cartesian, Geographic,
 };
 
 /// Represents the arc shape between two points in a globe.
@@ -31,8 +30,8 @@ where
     type IntoIter = ArcIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        let from = Vector::from(self.from).normalize();
-        let to = Vector::from(self.to).normalize();
+        let from = self.from.into_cartesian().normal();
+        let to = self.to.into_cartesian().normal();
 
         let rotation = Rotation::noop().with_axis(from.cross(&to)).with_theta(
             T::from(self.segments.get())
@@ -41,8 +40,8 @@ where
                     // arccosine of the division between the dot product and the product of the
                     // magnitudes.
                     //
-                    // Assuming both vectors are normalized (with magnitude = 1), the formula
-                    // can be simplified as the arccosine of the dot product.
+                    // Assuming both vectors are normalized (magnitude = 1), the formula can be
+                    // simplified as the arccosine of the dot product.
                     from.dot(&to).acos() / segments
                 })
                 .unwrap_or_default()
@@ -50,8 +49,8 @@ where
         );
 
         ArcIter {
-            from: from.into(),
-            to: to.into(),
+            from,
+            to,
             total_segments: self.segments.get(),
             next_segment: 0,
             rotation,

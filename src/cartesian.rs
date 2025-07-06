@@ -52,12 +52,6 @@ where
     }
 }
 
-impl<T> From<Vector<T>> for Cartesian<T> {
-    fn from(value: Vector<T>) -> Self {
-        value.0
-    }
-}
-
 impl<T> IntoIterator for Cartesian<T> {
     type Item = T;
 
@@ -87,9 +81,52 @@ impl<T> Cartesian<T>
 where
     T: Float,
 {
-    /// Returns the distance between self and the given point.
+    /// Returns the distance between self and rhs.
     pub fn distance(&self, rhs: &Self) -> T {
         ((self.x - rhs.x).powi(2) + (self.y - rhs.y).powi(2) + (self.z - rhs.z).powi(2)).sqrt()
+    }
+
+    /// Returns the magnitude of the vector of self.
+    pub fn magnitude(&self) -> T {
+        Cartesian::origin().distance(self)
+    }
+
+    /// Returns the dot product between the vectors of self and rhs.
+    pub fn dot(&self, rhs: &Self) -> T {
+        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+    }
+
+    /// Returns the normalized vector of self.
+    pub fn normal(self) -> Self {
+        self / self.magnitude()
+    }
+
+    /// Computes the cross product between the vector of self and rhs.
+    pub fn cross(&self, rhs: &Self) -> Self {
+        Cartesian::origin()
+            .with_x(self.y * rhs.z - self.z * rhs.y)
+            .with_y(self.z * rhs.x - self.x * rhs.z)
+            .with_z(self.x * rhs.y - self.y * rhs.x)
+    }
+}
+
+impl<T> Cartesian<T>
+where
+    T: Zero + One,
+{
+    /// Returns the unit vector pointing the positive X axis.
+    pub fn x() -> Self {
+        Cartesian::origin().with_x(T::one())
+    }
+
+    /// Returns the unit vector pointing the positive Y axis.
+    pub fn y() -> Self {
+        Cartesian::origin().with_y(T::one())
+    }
+
+    /// Returns the unit vector pointing the positive Z axis.
+    pub fn z() -> Self {
+        Cartesian::origin().with_z(T::one())
     }
 }
 
@@ -123,82 +160,6 @@ impl<T> Cartesian<T> {
     /// Performs the given transformation over self.
     pub fn transform<U: Transform<Self>>(self, transformation: U) -> Self {
         transformation.transform(self)
-    }
-}
-
-/// A vector in a cartesian space.
-#[derive(Debug, Default, Clone, Copy)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Vector<T>(Cartesian<T>);
-
-impl<T> From<Geographic<T>> for Vector<T>
-where
-    T: Signed + Float + FloatConst,
-{
-    fn from(value: Geographic<T>) -> Self {
-        Cartesian::from(value).into()
-    }
-}
-
-impl<T> From<Cartesian<T>> for Vector<T> {
-    fn from(value: Cartesian<T>) -> Self {
-        Self(value)
-    }
-}
-
-impl<T> Vector<T>
-where
-    T: Float,
-{
-    /// Returns the magnitude of this vector.
-    pub fn magnitude(&self) -> T {
-        Cartesian::origin().distance(&self.0)
-    }
-
-    /// Returns the dot product between self and rhs.
-    pub fn dot(&self, rhs: &Self) -> T {
-        self.0.x * rhs.0.x + self.0.y * rhs.0.y + self.0.z * rhs.0.z
-    }
-
-    /// Returns the normalized vector of self.
-    pub fn normalize(self) -> Self {
-        (self.0 / self.magnitude()).into()
-    }
-
-    /// Computes the cross product between self and rhs.
-    pub fn cross(&self, rhs: &Self) -> Self {
-        Cartesian::origin()
-            .with_x(self.0.y * rhs.0.z - self.0.z * rhs.0.y)
-            .with_y(self.0.z * rhs.0.x - self.0.x * rhs.0.z)
-            .with_z(self.0.x * rhs.0.y - self.0.y * rhs.0.x)
-            .into()
-    }
-}
-
-impl<T> Vector<T>
-where
-    T: Zero + One,
-{
-    /// Returns the unit vector pointing the positive X axis.
-    pub fn x() -> Self {
-        Cartesian::origin().with_x(T::one()).into()
-    }
-
-    /// Returns the unit vector pointing the positive Y axis.
-    pub fn y() -> Self {
-        Cartesian::origin().with_y(T::one()).into()
-    }
-
-    /// Returns the unit vector pointing the positive Z axis.
-    pub fn z() -> Self {
-        Cartesian::origin().with_z(T::one()).into()
-    }
-}
-
-impl<T> Vector<T> {
-    /// Returns a reference to the [`Cartesian`] representation of this vector.
-    pub fn as_cartesian(&self) -> &Cartesian<T> {
-        &self.0
     }
 }
 

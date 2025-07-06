@@ -1,5 +1,9 @@
-pub mod cartesian;
-pub mod geographic;
+mod cartesian;
+pub use cartesian::Cartesian;
+
+mod geographic;
+pub use geographic::{Altitude, Geographic, Latitude, Longitude};
+
 pub mod positive;
 pub mod radian;
 pub mod shape;

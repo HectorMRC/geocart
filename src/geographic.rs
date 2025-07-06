@@ -19,7 +19,7 @@ use crate::{cartesian::Cartesian, positive::Positive};
 /// ```
 /// use std::f64::consts::PI;
 ///
-/// use geocart::{geographic::Longitude};
+/// use geocart::Longitude;
 ///
 /// assert_eq!(
 ///     Longitude::from(PI + 1.),
@@ -90,7 +90,7 @@ impl<T> Longitude<T> {
 /// ```
 /// use std::f64::consts::PI;
 ///
-/// use geocart::geographic::Latitude;
+/// use geocart::Latitude;
 ///
 /// let overflowing_latitude = Latitude::from(-5. * PI / 4.);
 /// let equivalent_latitude = Latitude::from(PI / 4.);
@@ -157,7 +157,7 @@ impl<T> Latitude<T> {
 ///
 /// ## Example
 /// ```
-/// use geocart::geographic::Altitude;
+/// use geocart::Altitude;
 ///
 /// assert_eq!(
 ///     Altitude::from(-1.56),
@@ -215,6 +215,16 @@ where
             .with_longitude(coords.into())
             .with_latitude(coords.into())
             .with_altitude(coords.into())
+    }
+}
+
+impl<T> Geographic<T>
+where
+    T: Signed + Float + FloatConst,
+{
+    /// Returns the [`Cartesian`] representation of self.
+    pub fn into_cartesian(self) -> Cartesian<T> {
+        self.into()
     }
 }
 
