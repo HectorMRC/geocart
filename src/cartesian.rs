@@ -96,12 +96,12 @@ where
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
 
-    /// Returns the normalized vector of self.
+    /// Returns the coordinates of the normalized vector of self.
     pub fn normal(self) -> Self {
         self / self.magnitude()
     }
 
-    /// Computes the cross product between the vector of self and rhs.
+    /// Returns the cross product between the vectors of self and rhs.
     pub fn cross(&self, rhs: &Self) -> Self {
         Cartesian::origin()
             .with_x(self.y * rhs.z - self.z * rhs.y)
