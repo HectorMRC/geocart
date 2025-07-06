@@ -32,7 +32,7 @@ pub struct Longitude<T>(T);
 
 impl<T> From<T> for Longitude<T>
 where
-    T: Copy + PartialOrd + Signed + FloatConst + Euclid,
+    T: PartialOrd + Signed + FloatConst + Euclid,
 {
     fn from(value: T) -> Self {
         Self(if (-T::PI()..T::PI()).contains(&value) {
@@ -109,7 +109,7 @@ pub struct Latitude<T>(T);
 
 impl<T> From<T> for Latitude<T>
 where
-    T: Signed + Float + FloatConst,
+    T: Float + FloatConst,
 {
     fn from(value: T) -> Self {
         Self(if (-T::FRAC_PI_2()..=T::FRAC_PI_2()).contains(&value) {
@@ -122,7 +122,7 @@ where
 
 impl<T> From<Cartesian<T>> for Latitude<T>
 where
-    T: Signed + Float + FloatConst,
+    T: Float + FloatConst,
 {
     /// Computes the [Latitude] of the given [Cartesian] as specified by the [Spherical coordinate
     /// system](https://en.wikipedia.org/wiki/Spherical_coordinate_system).
@@ -208,13 +208,27 @@ pub struct Geographic<T> {
 
 impl<T> From<Cartesian<T>> for Geographic<T>
 where
-    T: PartialOrd + Default + Signed + Float + FloatConst + Euclid,
+    T: PartialOrd + Signed + Float + FloatConst + Euclid,
 {
     fn from(coords: Cartesian<T>) -> Self {
-        Self::default()
+        Self::origin()
             .with_longitude(coords.into())
             .with_latitude(coords.into())
             .with_altitude(coords.into())
+    }
+}
+
+impl<T> Geographic<T>
+where
+    T: Signed + Float + FloatConst + Euclid,
+{
+    /// Returns the geodic origin of coordinates.
+    pub fn origin() -> Self {
+        Self {
+            longitude: T::zero().into(),
+            latitude: T::zero().into(),
+            altitude: T::zero().into(),
+        }
     }
 }
 
@@ -367,40 +381,40 @@ mod tests {
             Test {
                 name: "north point",
                 input: Cartesian::origin().with_z(1.),
-                output: Geographic::default()
+                output: Geographic::origin()
                     .with_latitude(Latitude::from(FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "south point",
                 input: Cartesian::origin().with_z(-1.),
-                output: Geographic::default()
+                output: Geographic::origin()
                     .with_latitude(Latitude::from(-FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "east point",
                 input: Cartesian::origin().with_y(1.),
-                output: Geographic::default()
+                output: Geographic::origin()
                     .with_longitude(Longitude::from(FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "weast point",
                 input: Cartesian::origin().with_y(-1.),
-                output: Geographic::default()
+                output: Geographic::origin()
                     .with_longitude(Longitude::from(-FRAC_PI_2))
                     .with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "front point",
                 input: Cartesian::origin().with_x(1.),
-                output: Geographic::default().with_altitude(Altitude::from(1.)),
+                output: Geographic::origin().with_altitude(Altitude::from(1.)),
             },
             Test {
                 name: "back point",
                 input: Cartesian::origin().with_x(-1.),
-                output: Geographic::default()
+                output: Geographic::origin()
                     .with_longitude(Longitude::from(PI))
                     .with_altitude(Altitude::from(1.)),
             },
@@ -450,20 +464,20 @@ mod tests {
         vec![
             Test {
                 name: "Same point must be zero",
-                from: Geographic::default(),
-                to: Geographic::default(),
+                from: Geographic::origin(),
+                to: Geographic::origin(),
                 distance: 0.,
             },
             Test {
                 name: "Oposite points in the horizontal",
-                from: Geographic::default(),
-                to: Geographic::default().with_longitude(Longitude::from(-PI)),
+                from: Geographic::origin(),
+                to: Geographic::origin().with_longitude(Longitude::from(-PI)),
                 distance: PI,
             },
             Test {
                 name: "Oposite points in the vertical",
-                from: Geographic::default().with_latitude(Latitude::from(FRAC_PI_2)),
-                to: Geographic::default().with_latitude(Latitude::from(-FRAC_PI_2)),
+                from: Geographic::origin().with_latitude(Latitude::from(FRAC_PI_2)),
+                to: Geographic::origin().with_latitude(Latitude::from(-FRAC_PI_2)),
                 distance: PI,
             },
         ]

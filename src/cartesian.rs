@@ -163,37 +163,37 @@ mod tests {
         vec![
             Test {
                 name: "north point",
-                input: Geographic::default().with_latitude(Latitude::from(FRAC_PI_2)),
+                input: Geographic::origin().with_latitude(Latitude::from(FRAC_PI_2)),
                 output: Cartesian::origin().with_z(1.),
             },
             Test {
                 name: "south point",
-                input: Geographic::default().with_latitude(Latitude::from(-FRAC_PI_2)),
+                input: Geographic::origin().with_latitude(Latitude::from(-FRAC_PI_2)),
                 output: Cartesian::origin().with_z(-1.),
             },
             Test {
                 name: "east point",
-                input: Geographic::default().with_longitude(Longitude::from(FRAC_PI_2)),
+                input: Geographic::origin().with_longitude(Longitude::from(FRAC_PI_2)),
                 output: Cartesian::origin().with_y(1.),
             },
             Test {
                 name: "weast point",
-                input: Geographic::default().with_longitude(Longitude::from(-FRAC_PI_2)),
+                input: Geographic::origin().with_longitude(Longitude::from(-FRAC_PI_2)),
                 output: Cartesian::origin().with_y(-1.),
             },
             Test {
                 name: "front point",
-                input: Geographic::default(),
+                input: Geographic::origin(),
                 output: Cartesian::origin().with_x(1.),
             },
             Test {
                 name: "back point as negative bound",
-                input: Geographic::default().with_longitude(Longitude::from(-PI)),
+                input: Geographic::origin().with_longitude(Longitude::from(-PI)),
                 output: Cartesian::origin().with_x(-1.),
             },
             Test {
                 name: "back point as positive bound",
-                input: Geographic::default().with_longitude(Longitude::from(PI)),
+                input: Geographic::origin().with_longitude(Longitude::from(PI)),
                 output: Cartesian::origin().with_x(-1.),
             },
         ]
