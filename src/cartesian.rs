@@ -2,7 +2,7 @@
 
 use std::ops::Div;
 
-use num_traits::{Float, FloatConst, One, Signed, Zero};
+use num_traits::{Float, FloatConst, Signed, Zero};
 
 use crate::{geographic::Geographic, transform::Transform};
 
@@ -107,26 +107,6 @@ where
             .with_x(self.y * rhs.z - self.z * rhs.y)
             .with_y(self.z * rhs.x - self.x * rhs.z)
             .with_z(self.x * rhs.y - self.y * rhs.x)
-    }
-}
-
-impl<T> Cartesian<T>
-where
-    T: Zero + One,
-{
-    /// Returns the unit vector pointing the positive X axis.
-    pub fn x() -> Self {
-        Cartesian::origin().with_x(T::one())
-    }
-
-    /// Returns the unit vector pointing the positive Y axis.
-    pub fn y() -> Self {
-        Cartesian::origin().with_y(T::one())
-    }
-
-    /// Returns the unit vector pointing the positive Z axis.
-    pub fn z() -> Self {
-        Cartesian::origin().with_z(T::one())
     }
 }
 
