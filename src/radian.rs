@@ -4,13 +4,11 @@ use std::ops::Mul;
 
 use num_traits::{Float, FloatConst, Signed};
 
-use crate::positive::Positive;
-
 /// The [radian](https://en.wikipedia.org/wiki/Radian) unit, which is always a positive number
 /// within the range of [0, 2π).
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Radian<T>(Positive<T>);
+pub struct Radian<T>(T);
 
 impl<T> From<T> for Radian<T>
 where
@@ -18,7 +16,7 @@ where
 {
     fn from(value: T) -> Self {
         if (T::zero()..T::TAU()).contains(&value) {
-            return Self(value.into());
+            return Self(value);
         }
 
         let mut modulus = value % T::TAU();
@@ -26,7 +24,7 @@ where
             modulus = (modulus + T::TAU()) % T::TAU();
         }
 
-        Self(modulus.into())
+        Self(modulus)
     }
 }
 
@@ -44,7 +42,7 @@ where
 impl<T> Radian<T> {
     /// Returns the inner value.
     pub fn into_inner(self) -> T {
-        self.0.into_inner()
+        self.0
     }
 }
 

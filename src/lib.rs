@@ -1,13 +1,13 @@
 mod cartesian;
-pub use cartesian::Cartesian;
-
 mod geographic;
-pub use geographic::{Altitude, Geographic, Latitude, Longitude};
+mod positive;
+mod radian;
 
-pub mod positive;
-pub mod radian;
 pub mod shape;
 pub mod transform;
+
+pub use cartesian::Cartesian;
+pub use geographic::{Altitude, Geographic, Latitude, Longitude};
 
 #[cfg(test)]
 mod tests {
