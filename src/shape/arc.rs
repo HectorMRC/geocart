@@ -9,7 +9,7 @@ use crate::{
     Cartesian, Geographic,
 };
 
-/// Represents the arc shape between two points in a globe.
+/// An arc between two points in a globe.
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Arc<T> {

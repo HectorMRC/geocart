@@ -4,7 +4,7 @@ use num_traits::{Euclid, Float, FloatConst, Signed};
 
 use crate::{cartesian::Cartesian, positive::Positive};
 
-/// Represents the horizontal axis in a geographic system of coordinates.
+/// The horizontal axis in a geographic system of coordinates.
 ///
 /// ## Definition
 /// Since the longitude of a point on a sphere is the angle east (positive) or west (negative) in
@@ -74,7 +74,7 @@ impl<T> Longitude<T> {
     }
 }
 
-/// Represents the vertical axis in a geographic system of coordinates.
+/// The vertical axis in a geographic system of coordinates.
 ///
 /// ## Definition
 /// Since the latitude of a point on a sphere is the angle between the equatorial plane and the
@@ -148,7 +148,7 @@ impl<T> Latitude<T> {
     }
 }
 
-/// Represents the radius in a geographic system of coordinates.
+/// The radius in a geographic system of coordinates.
 ///
 /// ## Definition
 /// Since the altitude of a point on a sphere is the distance between that point and the center of
