@@ -345,14 +345,24 @@ mod tests {
                 output: -1.,
             },
             Test {
-                name: "positive overflowing latitude must change",
+                name: "positive overflowing latitude must be negative",
                 input: 7. * PI / 4.,
                 output: -PI / 4.,
             },
             Test {
-                name: "negative overflowing latidude must change",
+                name: "positive overflowing latitude must be positive",
+                input: 3. * FRAC_PI_2 / 2.,
+                output: FRAC_PI_2 / 2.,
+            },
+            Test {
+                name: "negative overflowing latidude must be positive",
                 input: -7. * PI / 4.,
                 output: PI / 4.,
+            },
+            Test {
+                name: "negative overflowing latidude must be negative",
+                input: -3. * FRAC_PI_2 / 2.,
+                output: -FRAC_PI_2 / 2.,
             },
         ]
         .into_iter()
