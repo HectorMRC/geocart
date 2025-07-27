@@ -1,6 +1,6 @@
 //! Cartesian system of coordinates.
 
-use std::ops::Div;
+use std::ops::{Add, Div, Mul};
 
 use num_traits::{Float, FloatConst, Signed, Zero};
 
@@ -59,6 +59,36 @@ impl<T> IntoIterator for Cartesian<T> {
 
     fn into_iter(self) -> Self::IntoIter {
         [self.x, self.y, self.z].into_iter()
+    }
+}
+
+impl<T> Add for Cartesian<T>
+where
+    T: Copy + Add<Output = T>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
+impl<T> Mul<T> for Cartesian<T>
+where
+    T: Copy + Mul<Output = T>,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
     }
 }
 

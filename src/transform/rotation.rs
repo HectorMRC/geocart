@@ -55,25 +55,9 @@ where
     T: Float,
 {
     fn transform(&self, coords: Cartesian<T>) -> Cartesian<T> {
-        let sin_theta = self.theta.into_inner().sin();
-        let cos_theta = self.theta.into_inner().cos();
-        let sub_1_cos_theta = T::one() - cos_theta;
-
-        let x = self.axis.x;
-        let y = self.axis.y;
-        let z = self.axis.z;
-
-        Cartesian {
-            x: coords.x * (cos_theta + x.powi(2) * sub_1_cos_theta)
-                + coords.y * (x * y * sub_1_cos_theta - z * sin_theta)
-                + coords.z * (x * z * sub_1_cos_theta + y * sin_theta),
-            y: coords.x * (y * x * sub_1_cos_theta + z * sin_theta)
-                + coords.y * (cos_theta + y.powi(2) * sub_1_cos_theta)
-                + coords.z * (y * z * sub_1_cos_theta - x * sin_theta),
-            z: coords.x * (z * x * sub_1_cos_theta - y * sin_theta)
-                + coords.y * (z * y * sub_1_cos_theta + x * sin_theta)
-                + coords.z * (cos_theta + z.powi(2) * sub_1_cos_theta),
-        }
+        coords * self.theta.into_inner().cos()
+            + self.axis.cross(&coords) * self.theta.into_inner().sin()
+            + self.axis * self.axis.dot(&coords) * (T::one() - self.theta.into_inner().cos())
     }
 }
 
