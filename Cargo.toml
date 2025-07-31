@@ -1,6 +1,6 @@
 [package]
 name = "geocart"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 description = "A bridge between geographic and cartesian coordinates."
@@ -17,4 +17,3 @@ geocart = { path = ".", features = ["serde"] }
 [features]
 default = []
 serde = ["dep:serde"]
-
