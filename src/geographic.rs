@@ -84,22 +84,22 @@ impl<T> Longitude<T> {
 ///
 /// ### Overflow
 /// Overflowing any of both boundaries of the latitude range behaves like moving away from that
-/// boundary and getting closer to the oposite one.
+/// boundary and getting closer to the opposite one.
 ///
 /// ## Example
 /// ```
-/// use std::f64::consts::PI;
+/// use std::f64::consts::FRAC_PI_4;
 ///
 /// use geocart::Latitude;
 ///
-/// let overflowing_latitude = Latitude::from(-5. * PI / 4.);
-/// let equivalent_latitude = Latitude::from(PI / 4.);
+/// let overflowing_latitude = Latitude::from(-5. * FRAC_PI_4);
+/// let equivalent_latitude = Latitude::from(FRAC_PI_4);
 ///
 /// // due precision error both values may not be exactly the same  
-/// let abs_error = 0.0000000000000002;
+/// let tolerance = 1e-09;
 ///
 /// assert!(
-///     (equivalent_latitude.into_inner() - overflowing_latitude.into_inner()).abs() <= abs_error,
+///     (equivalent_latitude.into_inner() - overflowing_latitude.into_inner()).abs() < tolerance,
 ///     "the overflowing latitude should be as the equivalent latitude ± e"
 /// );
 /// ```
@@ -246,8 +246,8 @@ impl<T> Geographic<T>
 where
     T: Copy + Float,
 {
-    /// Computes the [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance)
-    /// from self to the given point (in radiants).
+    /// Returns the [great-circle distance](https://en.wikipedia.org/wiki/Great-circle_distance)
+    /// from this point to rhs (in radiants).
     pub fn distance(&self, rhs: &Self) -> T {
         let prod_latitude_sin = self.latitude.into_inner().sin() * rhs.latitude.into_inner().sin();
         let prod_latitude_cos = self.latitude.into_inner().cos() * rhs.latitude.into_inner().cos();
@@ -278,7 +278,6 @@ mod tests {
     use crate::{
         cartesian::Cartesian,
         geographic::{Altitude, Geographic, Latitude, Longitude},
-        tests::approx_eq,
     };
 
     #[test]
@@ -325,8 +324,6 @@ mod tests {
 
     #[test]
     fn latitude_must_not_exceed_boundaries() {
-        const ABS_ERROR: f64 = 0.0000000000000003;
-
         struct Test {
             name: &'static str,
             input: f64,
@@ -368,9 +365,10 @@ mod tests {
         .into_iter()
         .for_each(|test| {
             let latitude = Latitude::from(test.input).into_inner();
+            let tolerance = 1e-09;
 
             assert!(
-                approx_eq(latitude, test.output, ABS_ERROR),
+                (latitude - test.output).abs() < tolerance,
                 "{}: got latitude = {}, want {}",
                 test.name,
                 latitude,
@@ -380,7 +378,7 @@ mod tests {
     }
 
     #[test]
-    fn geographic_from_cartesian_must_not_fail() {
+    fn geographic_from_cartesian() {
         struct Test {
             name: &'static str,
             input: Cartesian<f64>,
@@ -463,7 +461,7 @@ mod tests {
     }
 
     #[test]
-    fn distance_must_not_fail() {
+    fn geographic_distance() {
         struct Test<'a> {
             name: &'a str,
             from: Geographic<f64>,

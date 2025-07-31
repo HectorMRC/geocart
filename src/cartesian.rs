@@ -183,7 +183,7 @@ mod tests {
     };
 
     #[test]
-    fn cartesian_from_geographic_must_not_fail() {
+    fn cartesian_from_geographic() {
         struct Test {
             name: &'static str,
             input: Geographic<f64>,

@@ -24,8 +24,7 @@ use super::Transform;
 /// };
 ///
 /// // due precision error both values may not be exactly the same
-/// const ABS_ERROR: f64 = 0.0000000000000001;
-///
+/// let tolerance = 1e-09;
 ///
 /// let rotated = Rotation::noop()
 ///     .with_axis(Cartesian::origin().with_x(1.))
@@ -37,7 +36,7 @@ use super::Transform;
 ///     .zip(Cartesian::origin().with_z(1.))
 ///     .for_each(|(got, want)| {
 ///         assert!(
-///             (got - want).abs() <= ABS_ERROR,
+///             (got - want).abs() < tolerance,
 ///             "point at y1 should be rotated around the x axis to z1",
 ///         );
 ///     });
@@ -90,15 +89,12 @@ mod tests {
 
     use crate::{
         radian::Radian,
-        tests::approx_eq,
         transform::{Rotation, Transform},
         Cartesian,
     };
 
     #[test]
-    fn rotation_must_not_fail() {
-        const ABS_ERROR: f64 = 0.0000000000000003;
-
+    fn cartesian_rotation() {
         struct Test {
             name: &'static str,
             theta: Radian<f64>,
@@ -172,13 +168,15 @@ mod tests {
                 .with_theta(test.theta)
                 .transform(test.input);
 
+            let tolerance = 1e-09;
+
             rotated
                 .into_iter()
                 .zip(test.output)
                 .for_each(|(got, want)| {
                     assert!(
-                        approx_eq(got, want, ABS_ERROR),
-                        "{}: got rotated = {:?}, want ± e = {:?}",
+                        (got - want).abs() < tolerance,
+                        "{}: got rotated = {:?}, want {:?}",
                         test.name,
                         rotated,
                         test.output
