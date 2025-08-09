@@ -254,6 +254,7 @@ where
         let longitude_diff = (self.longitude.into_inner() - rhs.longitude.into_inner()).abs();
 
         (prod_latitude_sin + prod_latitude_cos * longitude_diff.cos()).acos()
+            * self.altitude.into_inner()
     }
 }
 
@@ -472,20 +473,26 @@ mod tests {
         vec![
             Test {
                 name: "Same point must be zero",
-                from: Geographic::origin(),
-                to: Geographic::origin(),
+                from: Geographic::origin().with_altitude(Altitude::from(1.)),
+                to: Geographic::origin().with_altitude(Altitude::from(1.)),
                 distance: 0.,
             },
             Test {
                 name: "Oposite points in the horizontal",
-                from: Geographic::origin(),
-                to: Geographic::origin().with_longitude(Longitude::from(-PI)),
+                from: Geographic::origin().with_altitude(Altitude::from(1.)),
+                to: Geographic::origin()
+                    .with_longitude(Longitude::from(-PI))
+                    .with_altitude(Altitude::from(1.)),
                 distance: PI,
             },
             Test {
                 name: "Oposite points in the vertical",
-                from: Geographic::origin().with_latitude(Latitude::from(FRAC_PI_2)),
-                to: Geographic::origin().with_latitude(Latitude::from(-FRAC_PI_2)),
+                from: Geographic::origin()
+                    .with_latitude(Latitude::from(FRAC_PI_2))
+                    .with_altitude(Altitude::from(1.)),
+                to: Geographic::origin()
+                    .with_latitude(Latitude::from(-FRAC_PI_2))
+                    .with_altitude(Altitude::from(1.)),
                 distance: PI,
             },
         ]
