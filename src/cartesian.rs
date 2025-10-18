@@ -1,6 +1,6 @@
 //! Cartesian system of coordinates.
 
-use std::ops::{Add, Div, Mul};
+use std::ops::{Add, Div, Mul, Sub};
 
 use num_traits::{Float, FloatConst, Signed, Zero};
 
@@ -73,6 +73,21 @@ where
             x: self.x + rhs.x,
             y: self.y + rhs.y,
             z: self.z + rhs.z,
+        }
+    }
+}
+
+impl<T> Sub for Cartesian<T>
+where
+    T: Copy + Sub<Output = T>,
+{
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
         }
     }
 }
